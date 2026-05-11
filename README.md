@@ -1,3 +1,3 @@
 # Proyecto para programación 3 | UTN-FRRO-TUP |
-## Integrantes:
+Integrantes:
 Columba Fabricio - Longo Leonel - Auzmendi Tobias
