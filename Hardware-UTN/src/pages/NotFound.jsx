@@ -6,7 +6,7 @@ function NotFound() {
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h2>¡Oops! Página no encontrada</h2>
+      <h2>Página no encontrada</h2>
       <Button onClick={() => navigate("/login")}>
         Volver al login
       </Button>
