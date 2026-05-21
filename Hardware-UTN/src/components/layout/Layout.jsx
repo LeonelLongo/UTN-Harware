@@ -6,31 +6,38 @@ function Layout({ children }) {
       {/* HEADER */}
       <div
         style={{
-          backgroundColor: "black",
+          backgroundColor: "#111",
           color: "white",
-          padding: "15px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          padding: "15px 0",
+          boxShadow: "0 2px 5px rgba(0,0,0,0.3)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <h3 style={{ margin: 0 }}>Hardware UTN</h3>
+        <Container
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+          }}
+        >
+          <h3 style={{ margin: 0, fontWeight: "bold" }}>
+            Hardware UTN
+          </h3>
 
-          <img src="/logo.png" alt="logo" style={{ width: "80px" }} />
-        </div>
+          <img src="/logo.png" alt="logo" style={{ width: "60px" }} />
+        </Container>
       </div>
 
       {/* CONTENIDO */}
-      <Container
+      <div
         style={{
-          backgroundColor: "white",
+          backgroundColor: "#f5f5f5",
           minHeight: "100vh",
-          paddingTop: "20px",
+          padding: "30px 0",
         }}
       >
-        {children}
-      </Container>
+        <Container>{children}</Container>
+      </div>
     </>
   );
 }

@@ -6,10 +6,6 @@ const Login = ({ setIsLoggedIn }  ) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const Login = ({ setIsLoggedIn }) => {
-    const navigate = useNavigate();
-  };
-
   const navigate = useNavigate();
 
   const [errors, setErrors] = useState({

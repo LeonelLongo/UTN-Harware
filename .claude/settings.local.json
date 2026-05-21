@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Fabri\\\\Desktop\\\\TP PROG\\\\UTN-Harware\\\\Hardware-UTN\\\\src\" -Recurse)",
+      "Bash(Select-Object FullName, PSIsContainer)"
+    ]
+  }
+}
