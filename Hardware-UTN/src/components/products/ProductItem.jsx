@@ -1,31 +1,24 @@
-import React from "react";
 import { Card, Button } from "react-bootstrap";
 
 function ProductItem({ name, price, onAdd }) {
   return (
-    <div
+    <Card
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        borderRadius: "10px",
+        boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+        textAlign: "center",
+        padding: "10px",
       }}
     >
-      <Card
-        className="mt-5 mx-auto shadow"
-        style={{
-          maxWidth: "400px",
-          backgroundColor: "#FFD2C9",
-          color: "wite",
-          borderRadius: "10px",
-        }}
-      >
-        <Card.Body>
-          <Card.Title>{name}</Card.Title>
-          <Card.Text>${price}</Card.Text>
-          <Button onClick={onAdd}>Agregar</Button>
-        </Card.Body>
-      </Card>
-    </div>
+      <Card.Body>
+        <Card.Title>{name}</Card.Title>
+        <Card.Text>${price}</Card.Text>
+
+        <Button variant="primary" onClick={onAdd}>
+          Agregar
+        </Button>
+      </Card.Body>
+    </Card>
   );
 }
 
