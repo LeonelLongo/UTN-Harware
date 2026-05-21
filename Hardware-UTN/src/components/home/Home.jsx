@@ -1,6 +1,7 @@
 import { Container } from "react-bootstrap";
 import { useState } from "react";
 import ProductList from "../components/products/ProductList";
+import Layout from "../components/layout/Layout";
 
 function Home() {
   const products = [
@@ -40,7 +41,7 @@ function Home() {
   console.log(cart);
 
   return (
-    <Container className="mt-4">
+    <Layout>
       <ul>
         {cart.map((p) => (
           <li key={p.id}>
@@ -49,10 +50,10 @@ function Home() {
           </li>
         ))}
       </ul>
-      <h1>Hardware UTN</h1>
       <p>Productos en carrito: {cart.length}</p>
       <ProductList products={products} onAdd={handleAddToCart} />
-    </Container>
+
+    </Layout>
   );
 }
 
