@@ -1,17 +1,12 @@
 import { useState } from "react";
-import { Button, Card, Col, Form, FormGroup, Row } from "react-bootstrap";
+import { Button, Card, Form, FormGroup, Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-const Login = ({ setIsLoggedIn }  ) => {
+const Login = ({ setIsLoggedIn }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [errors, setErrors] = useState({ email: false, password: false });
   const navigate = useNavigate();
-
-  const [errors, setErrors] = useState({
-    email: false,
-    password: false,
-  });
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
@@ -25,14 +20,11 @@ const Login = ({ setIsLoggedIn }  ) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
     const newErrors = {
       email: email.trim() === "",
       password: password.length < 7,
     };
-
     setErrors(newErrors);
-
     if (!newErrors.email && !newErrors.password) {
       setIsLoggedIn(true);
       navigate("/");
@@ -40,62 +32,69 @@ const Login = ({ setIsLoggedIn }  ) => {
   };
 
   return (
-    <Card className="mt-5 mx-3 p-3 px-5 shadow">
-      <Card.Body>
-        <Row className="mb-2">
-          <h5>¡Bienvenido a Hardware UTN!</h5>
-        </Row>
+    <div
+      style={{ backgroundColor: "var(--color-header)", minHeight: "100vh" }}
+      className="d-flex align-items-center justify-content-center"
+    >
+      <Container style={{ maxWidth: "420px" }}>
+        <div className="text-center mb-4">
+          <img src="/logo.png" alt="logo" style={{ width: "200px" }} />
+          <h4
+            className="mt-2 fw-bold"
+            style={{ color: "var(--color-accent)", letterSpacing: "0.5px" }}
+          >
+            Hardware UTN
+          </h4>
+        </div>
 
-        <Form onSubmit={handleSubmit}>
-          <FormGroup className="mb-4">
-            <Form.Control
-              type="email"
-              placeholder="Ingresar email"
-              onChange={handleEmailChange}
-              value={email}
-              className={errors.email ? "border border-danger" : ""}
-              style={{
-                backgroundColor: "#E39E8F",
-                color: "white",
-                border: "1px solid #444",
-              }}
-            />
-            {errors.email && (
-              <p style={{ color: "red" }}>Ingresá un email válido</p>
-            )}
-          </FormGroup>
+        <Card className="shadow-lg border-0">
+          <Card.Body className="p-4">
+            <h5 className="fw-bold mb-1">Iniciar sesión</h5>
+            <p className="text-muted small mb-4">Ingresá tus credenciales para continuar</p>
 
-          <FormGroup className="mb-4">
-            <Form.Control
-              type="password"
-              placeholder="Ingresar contraseña"
-              onChange={handlePasswordChange}
-              value={password}
-              className={errors.password ? "border border-danger" : ""}
-              style={{
-                backgroundColor: "#E39E8F",
-                color: "white",
-                border: "1px solid #444",
-              }}
-            />
-            {errors.password && (
-              <p style={{ color: "red" }}>
-                La contraseña debe tener al menos 6 caracteres
-              </p>
-            )}
-          </FormGroup>
+            <Form onSubmit={handleSubmit}>
+              <FormGroup className="mb-3">
+                <Form.Label className="fw-semibold small">Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  placeholder="tu@email.com"
+                  value={email}
+                  onChange={handleEmailChange}
+                  isInvalid={errors.email}
+                />
+                <Form.Control.Feedback type="invalid">
+                  Ingresá un email válido.
+                </Form.Control.Feedback>
+              </FormGroup>
 
-          <Row>
-            <Col />
-            <Col md={6} className="d-flex justify-content-end">
-              <Button variant="success" type="submit" style={{ width: "100%" }}>
-                Iniciar sesión
-              </Button>
-            </Col>
-          </Row>
-        </Form>
-      </Card.Body>
-    </Card>
+              <FormGroup className="mb-4">
+                <Form.Label className="fw-semibold small">Contraseña</Form.Label>
+                <Form.Control
+                  type="password"
+                  placeholder="Mínimo 7 caracteres"
+                  value={password}
+                  onChange={handlePasswordChange}
+                  isInvalid={errors.password}
+                />
+                <Form.Control.Feedback type="invalid">
+                  La contraseña debe tener al menos 7 caracteres.
+                </Form.Control.Feedback>
+              </FormGroup>
+
+              <div className="d-grid">
+                <Button
+                  type="submit"
+                  size="lg"
+                  style={{ backgroundColor: "var(--color-accent)", border: "none" }}
+                >
+                  Ingresar
+                </Button>
+              </div>
+            </Form>
+          </Card.Body>
+        </Card>
+      </Container>
+    </div>
   );
 };
 

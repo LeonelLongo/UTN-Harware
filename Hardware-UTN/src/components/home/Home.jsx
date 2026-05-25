@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { Button } from "react-bootstrap";
 import Layout from "../layout/Layout";
 import ProductList from "../products/ProductList";
 
@@ -12,7 +10,6 @@ function Home({cart, setCart}) {
   ];
 
   const handleAddToCart = (product) => {
-    console.log("SE EJECUTA", product);
     const existing = cart.find((p) => p.id === product.id);
 
     if (existing) {
@@ -26,29 +23,11 @@ function Home({cart, setCart}) {
     }
   };
 
-  const handleClearCart = () => {
-    setCart([]);
-  };
+  const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
 
   return (
-    <Layout>
-      {/* BOTÓN CORRECTO */}
-      <div style={{ marginBottom: "20px" }}>
-        <Button variant="danger" onClick={handleClearCart}>
-          Vaciar carrito
-        </Button>
-      </div>
-
-      <ProductList products={products} onAdd={handleAddToCart} />
-      <div style={{ marginBottom: "20px" }}>
-        <h5>Carrito ({cart.length})</h5>
-
-        {cart.map((p) => (
-          <div key={p.id}>
-            {p.name} x{p.quantity}
-          </div>
-        ))}
-      </div>
+    <Layout cartCount={cartCount}>
+      <ProductList products={products} onAdd={handleAddToCart} cart={cart} />
     </Layout>
   );
 }
