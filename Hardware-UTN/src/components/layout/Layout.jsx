@@ -1,41 +1,73 @@
 import { Container } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
-function Layout({ children }) {
+function Layout({ children, cartCount = 0 }) {
   return (
     <>
-      {/* HEADER */}
-      <div
-        style={{
-          backgroundColor: "#111",
-          color: "white",
-          padding: "15px 0",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.3)",
-        }}
-      >
+      <div style={{ backgroundColor: "var(--color-header)", color: "white" }}>
         <Container
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            gap: "10px",
+            justifyContent: "space-between",
+            padding: "12px 16px",
           }}
         >
-          <h3 style={{ margin: 0, fontWeight: "bold" }}>
-            Hardware UTN
-          </h3>
+          <Link
+            to="/"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              textDecoration: "none",
+              color: "white",
+            }}
+          >
+            <img src="/logo.png" alt="logo" style={{ width: "40px" }} />
+            <span style={{ fontWeight: 700, fontSize: "1.1rem", color: "var(--color-accent)" }}>
+              Hardware UTN
+            </span>
+          </Link>
 
-          <img src="/logo.png" alt="logo" style={{ width: "60px" }} />
+          <Link
+            to="/cart"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              textDecoration: "none",
+              backgroundColor: "var(--color-accent)",
+              color: "white",
+              padding: "8px 16px",
+              borderRadius: "var(--border-radius)",
+              fontWeight: 600,
+              fontSize: "0.95rem",
+            }}
+          >
+            Carrito
+            {cartCount > 0 && (
+              <span
+                style={{
+                  backgroundColor: "white",
+                  color: "var(--color-accent)",
+                  borderRadius: "50%",
+                  width: "22px",
+                  height: "22px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                }}
+              >
+                {cartCount}
+              </span>
+            )}
+          </Link>
         </Container>
       </div>
 
-      {/* CONTENIDO */}
-      <div
-        style={{
-          backgroundColor: "#f5f5f5",
-          minHeight: "100vh",
-          padding: "30px 0",
-        }}
-      >
+      <div style={{ backgroundColor: "var(--color-background)", minHeight: "calc(100vh - 64px)", padding: "24px 0" }}>
         <Container>{children}</Container>
       </div>
     </>

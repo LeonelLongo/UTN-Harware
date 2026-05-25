@@ -1,21 +1,26 @@
-import { Card, Button } from "react-bootstrap";
+import { Card, Button, Badge } from "react-bootstrap";
 
-function ProductItem({ name, price, onAdd }) {
+function ProductItem({ name, price, onAdd, quantityInCart = 0 }) {
   return (
-    <Card
-      style={{
-        borderRadius: "10px",
-        boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-        textAlign: "center",
-        padding: "10px",
-      }}
-    >
-      <Card.Body>
-        <Card.Title>{name}</Card.Title>
-        <Card.Text>${price}</Card.Text>
+    <Card className="h-100 shadow-sm border-0">
+      <Card.Header
+        className="fw-bold"
+        style={{ backgroundColor: "var(--color-header)", color: "white" }}
+      >
+        {name}
+      </Card.Header>
 
-        <Button variant="primary" onClick={onAdd}>
-          Agregar
+      <Card.Body className="d-flex flex-column justify-content-between">
+        <span className="fw-bold fs-3" style={{ color: "var(--color-accent)" }}>
+          ${price}
+        </span>
+
+        <Button
+          className="mt-3 w-100 fw-semibold"
+          style={{ backgroundColor: "var(--color-accent)", border: "none" }}
+          onClick={onAdd}
+        >
+          {quantityInCart > 0 ? `+ Agregar (${quantityInCart} en carrito)` : "Agregar al carrito"}
         </Button>
       </Card.Body>
     </Card>
