@@ -8,6 +8,7 @@ import Cart from "./components/cart/Cart.jsx";
 import Admin from "./components/admin/Admin";
 import Protected from "./components/auth/Protected";
 import NotFound from "./components/notFound/NotFound";
+import ProductDetail from "./components/products/ProductDetail";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -24,18 +25,19 @@ function App() {
 
         <Route
           path="/"
-          element={
-            <Protected isSignedIn={isLoggedIn}>
-              <Home cart={cart} setCart={setCart} />
-            </Protected>
-          }
+          element={<Home cart={cart} setCart={setCart} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />}
+        />
+
+        <Route
+          path="/producto/:id"
+          element={<ProductDetail cart={cart} setCart={setCart} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />}
         />
 
         <Route
           path="/cart"
           element={
             <Protected isSignedIn={isLoggedIn}>
-              <Cart cart={cart} setCart={setCart} />
+              <Cart cart={cart} setCart={setCart} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
             </Protected>
           }
         />
