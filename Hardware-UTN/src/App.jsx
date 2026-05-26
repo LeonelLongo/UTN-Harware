@@ -17,7 +17,6 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Ruta pública */}
         <Route
           path="/login"
           element={<Login setIsLoggedIn={setIsLoggedIn} />}
@@ -51,7 +50,6 @@ function App() {
           }
         />
 
-        {/* 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

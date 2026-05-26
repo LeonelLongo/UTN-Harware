@@ -50,7 +50,6 @@ function ProductDetail({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
 
       <Card className="shadow-sm border-0 p-4">
         <Row className="align-items-center g-4">
-          {/* Imagen */}
           <Col md={6} className="text-center">
             <div style={{ backgroundColor: "#f8f8f8", borderRadius: "var(--border-radius)", padding: "32px" }}>
               <img
@@ -61,7 +60,6 @@ function ProductDetail({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
             </div>
           </Col>
 
-          {/* Info */}
           <Col md={6}>
             <h2 className="fw-bold mb-3">{product.name}</h2>
             <p className="fw-bold mb-4" style={{ color: "var(--color-accent)", fontSize: "2rem" }}>
@@ -77,7 +75,6 @@ function ProductDetail({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
               {quantityInCart > 0 ? `+ Agregar (${quantityInCart} en carrito)` : "Agregar al carrito"}
             </Button>
 
-            {/* Especificaciones */}
             {product.specs.length > 0 && (
               <div>
                 <h5 className="fw-bold mb-3">Especificaciones técnicas</h5>

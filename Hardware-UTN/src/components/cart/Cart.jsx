@@ -73,7 +73,6 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
         </Card>
       ) : (
         <Row>
-          {/* Tabla de productos */}
           <Col md={8} className="mb-4">
             <Card className="shadow-sm">
               <Card.Body className="p-0">
@@ -139,7 +138,6 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
             </Card>
           </Col>
 
-          {/* Resumen del pedido */}
           <Col md={4}>
             <Card className="shadow-sm">
               <Card.Header style={{ backgroundColor: "var(--color-header)", color: "white" }}>
@@ -160,7 +158,6 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
                   <span style={{ color: "var(--color-accent)" }}>${total.toLocaleString("es-AR")}</span>
                 </div>
 
-                {/* Cupón */}
                 {!couponApplied ? (
                   <>
                     <InputGroup className="mb-1">
