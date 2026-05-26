@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Carousel, Modal, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
 import ProductList from "../products/ProductList";
-import { products } from "../../data/products";
 import carrusel1 from "../../assets/imagenes/carrusel/carrusel1.png";
 import carrusel2 from "../../assets/imagenes/carrusel/carrusel2.png";
 import carrusel3 from "../../assets/imagenes/carrusel/carrusel3.png";
@@ -15,12 +14,23 @@ const carouselImages = [
 ];
 
 function Home({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
+  const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    fetch("http://localhost:3000/items")
+      .then(res => res.json())
+      .then(data => {
+        console.log(data)
+        setProducts([...data])
+      })
+      .catch(err => console.log(err));
+  }, []);
+
   const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    p.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleAddToCart = (product) => {
