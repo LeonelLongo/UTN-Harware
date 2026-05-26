@@ -16,7 +16,7 @@ function Layout({ children, cartCount = 0, onSearchChange = null, isLoggedIn = f
 
   return (
     <>
-      <div style={{ backgroundColor: "var(--color-header)", color: "white" }}>
+      <div style={{ backgroundColor: "var(--color-header)", color: "white", position: "sticky", top: 0, zIndex: 1000 }}>
         <Container
           style={{
             display: "flex",
