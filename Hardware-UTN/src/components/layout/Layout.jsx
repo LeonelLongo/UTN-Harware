@@ -1,9 +1,5 @@
 import { useState } from "react";
 import { Container } from "react-bootstrap";
-<<<<<<< Updated upstream
-
-function Layout({ children }) {
-=======
 import { Link, useNavigate } from "react-router-dom";
 
 function Layout({ children, cartCount = 0, onSearchChange = null, isLoggedIn = false, onLogout = null }) {
@@ -18,33 +14,13 @@ function Layout({ children, cartCount = 0, onSearchChange = null, isLoggedIn = f
     if (e.key === "Enter") handleSearch();
   };
 
->>>>>>> Stashed changes
   return (
     <>
-      {/* HEADER */}
-      <div
-        style={{
-          backgroundColor: "#111",
-          color: "white",
-          padding: "15px 0",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.3)",
-        }}
-      >
+      <div style={{ backgroundColor: "var(--color-header)", color: "white" }}>
         <Container
           style={{
             display: "flex",
             alignItems: "center",
-<<<<<<< Updated upstream
-            justifyContent: "center",
-            gap: "10px",
-          }}
-        >
-          <h3 style={{ margin: 0, fontWeight: "bold" }}>
-            Hardware UTN
-          </h3>
-
-          <img src="/logo.png" alt="logo" style={{ width: "60px" }} />
-=======
             justifyContent: "space-between",
             padding: "12px 16px",
             gap: "16px",
@@ -177,18 +153,10 @@ function Layout({ children, cartCount = 0, onSearchChange = null, isLoggedIn = f
               )}
             </Link>
           </div>
->>>>>>> Stashed changes
         </Container>
       </div>
 
-      {/* CONTENIDO */}
-      <div
-        style={{
-          backgroundColor: "#f5f5f5",
-          minHeight: "100vh",
-          padding: "30px 0",
-        }}
-      >
+      <div style={{ backgroundColor: "var(--color-background)", minHeight: "calc(100vh - 64px)", padding: "24px 0" }}>
         <Container>{children}</Container>
       </div>
     </>

@@ -1,15 +1,3 @@
-<<<<<<< Updated upstream
-import Layout from "../layout/Layout";
-
-function Cart({ cart, setCart }) {
-  const handleClearCart = () => {
-    setCart([]);
-  };
-
-  return (
-    <Layout>
-      <h2>Carrito</h2>
-=======
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Row, Col, Table, Button, Card, Badge, Form, InputGroup } from "react-bootstrap";
@@ -75,32 +63,82 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
       onLogout={() => { setIsLoggedIn(false); navigate("/"); }}
     >
       <h4 className="mb-4 fw-bold">Carrito de compras</h4>
->>>>>>> Stashed changes
 
       {cart.length === 0 ? (
-        <p>No hay productos</p>
+        <Card className="text-center py-5 shadow-sm">
+          <Card.Body>
+            <div style={{ fontSize: "3rem" }}></div>
+            <h5 className="mt-3">Tu carrito está vacío</h5>
+          </Card.Body>
+        </Card>
       ) : (
-        <>
-          {cart.map((p) => (
-            <div key={p.id}>
-              {p.name} x{p.quantity} - ${p.price * p.quantity}
-            </div>
-          ))}
+        <Row>
+          {/* Tabla de productos */}
+          <Col md={8} className="mb-4">
+            <Card className="shadow-sm">
+              <Card.Body className="p-0">
+                <Table responsive hover className="mb-0">
+                  <thead style={{ backgroundColor: "var(--color-header)", color: "white" }}>
+                    <tr>
+                      <th className="ps-3">Producto</th>
+                      <th className="text-center">Cantidad</th>
+                      <th className="text-end">Precio unit.</th>
+                      <th className="text-end">Subtotal</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cart.map((p) => (
+                      <tr key={p.id} className="align-middle">
+                        <td className="ps-3 fw-semibold">{p.name}</td>
+                        <td className="text-center">
+                          <div className="d-flex align-items-center justify-content-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline-secondary"
+                              onClick={() => handleDecrement(p.id)}
+                              style={{ width: "28px", height: "28px", padding: 0, lineHeight: 1 }}
+                            >
+                              −
+                            </Button>
+                            <Badge bg="secondary" style={{ fontSize: "0.9rem", minWidth: "28px" }}>
+                              {p.quantity}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              variant="outline-secondary"
+                              onClick={() => handleIncrement(p.id)}
+                              style={{ width: "28px", height: "28px", padding: 0, lineHeight: 1 }}
+                            >
+                              +
+                            </Button>
+                          </div>
+                        </td>
+                        <td className="text-end">${p.price.toLocaleString("es-AR")}</td>
+                        <td className="text-end fw-bold">${(p.price * p.quantity).toLocaleString("es-AR")}</td>
+                        <td className="text-center">
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            onClick={() => handleRemove(p.id)}
+                            title="Eliminar"
+                          >
+                            ✕
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </Card.Body>
+              <Card.Footer className="text-end">
+                <Button variant="outline-danger" size="sm" onClick={handleClear}>
+                  Vaciar carrito
+                </Button>
+              </Card.Footer>
+            </Card>
+          </Col>
 
-<<<<<<< Updated upstream
-          <h4>
-            Total: $
-            {cart.reduce(
-              (acc, p) => acc + p.price * p.quantity,
-              0
-            )}
-          </h4>
-
-          <button onClick={handleClearCart}>
-            Vaciar carrito
-          </button>
-        </>
-=======
           {/* Resumen del pedido */}
           <Col md={4}>
             <Card className="shadow-sm">
@@ -113,13 +151,13 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
                     <span className="text-muted">
                       {p.name} x{p.quantity}
                     </span>
-                    <span>${p.price * p.quantity}</span>
+                    <span>${(p.price * p.quantity).toLocaleString("es-AR")}</span>
                   </div>
                 ))}
                 <hr />
                 <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
                   <span>Total</span>
-                  <span style={{ color: "var(--color-accent)" }}>${total}</span>
+                  <span style={{ color: "var(--color-accent)" }}>${total.toLocaleString("es-AR")}</span>
                 </div>
 
                 {/* Cupón */}
@@ -165,7 +203,7 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
                       {CUOTAS} cuotas sin interés de:
                     </p>
                     <p className="fw-bold fs-5 mb-0" style={{ color: "var(--color-accent)" }}>
-                      ${cuotaValor} / cuota
+                      ${Number(cuotaValor).toLocaleString("es-AR")} / cuota
                     </p>
                   </div>
                 )}
@@ -174,6 +212,7 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
                 <Button
                   size="lg"
                   style={{ backgroundColor: "var(--color-accent)", border: "none" }}
+                  onClick={() => { alert("¡Compra finalizada! Muchas gracias por su compra."); handleClear(); }}
                 >
                   Finalizar compra
                 </Button>
@@ -181,8 +220,11 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
             </Card>
           </Col>
         </Row>
->>>>>>> Stashed changes
       )}
+
+      <Link to="/" className="text-decoration-none small d-inline-block mt-3" style={{ color: "var(--color-accent)" }}>
+        ← Seguir comprando
+      </Link>
     </Layout>
   );
 }

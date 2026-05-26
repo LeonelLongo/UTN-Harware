@@ -20,7 +20,7 @@ export const products = [
   {
     id: 3,
     name: "Memoria Ram 16gb Ddr4",
-    price: 18000,
+    price: 180000,
     image: ram1,
     specs: [],
   },

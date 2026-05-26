@@ -1,23 +1,4 @@
 import { Card, Button } from "react-bootstrap";
-<<<<<<< Updated upstream
-
-function ProductItem({ name, price, onAdd }) {
-  return (
-    <Card
-      style={{
-        borderRadius: "10px",
-        boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-        textAlign: "center",
-        padding: "10px",
-      }}
-    >
-      <Card.Body>
-        <Card.Title>{name}</Card.Title>
-        <Card.Text>${price}</Card.Text>
-
-        <Button variant="primary" onClick={onAdd}>
-          Agregar
-=======
 import { useNavigate } from "react-router-dom";
 
 function ProductItem({ id, name, price, image, onAdd, quantityInCart = 0 }) {
@@ -57,7 +38,6 @@ function ProductItem({ id, name, price, image, onAdd, quantityInCart = 0 }) {
           onClick={(e) => { e.stopPropagation(); onAdd(); }}
         >
           {quantityInCart > 0 ? `+ Agregar (${quantityInCart} en carrito)` : "Agregar al carrito"}
->>>>>>> Stashed changes
         </Button>
       </Card.Body>
     </Card>

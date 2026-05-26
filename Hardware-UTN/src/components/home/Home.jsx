@@ -1,10 +1,6 @@
 import { useState } from "react";
-<<<<<<< Updated upstream
-import { Button } from "react-bootstrap";
-=======
 import { Carousel, Modal, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
->>>>>>> Stashed changes
 import Layout from "../layout/Layout";
 import ProductList from "../products/ProductList";
 import { products } from "../../data/products";
@@ -28,16 +24,10 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
   );
 
   const handleAddToCart = (product) => {
-<<<<<<< Updated upstream
-    console.log("SE EJECUTA", product);
-    const existing = cart.find((p) => p.id === product.id);
-=======
     if (!isLoggedIn) {
       setShowLoginModal(true);
       return;
     }
->>>>>>> Stashed changes
-
     const existing = cart.find((p) => p.id === product.id);
     if (existing) {
       setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p));
@@ -46,31 +36,9 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
     }
   };
 
-  const handleClearCart = () => {
-    setCart([]);
-  };
+  const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
 
   return (
-<<<<<<< Updated upstream
-    <Layout>
-      {/* BOTÓN CORRECTO */}
-      <div style={{ marginBottom: "20px" }}>
-        <Button variant="danger" onClick={handleClearCart}>
-          Vaciar carrito
-        </Button>
-      </div>
-
-      <ProductList products={products} onAdd={handleAddToCart} />
-      <div style={{ marginBottom: "20px" }}>
-        <h5>Carrito ({cart.length})</h5>
-
-        {cart.map((p) => (
-          <div key={p.id}>
-            {p.name} x{p.quantity}
-          </div>
-        ))}
-      </div>
-=======
     <Layout cartCount={cartCount} onSearchChange={setSearchQuery} isLoggedIn={isLoggedIn} onLogout={() => setIsLoggedIn(false)}>
       <Carousel
         controls={false}
@@ -101,7 +69,6 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
           </Button>
         </Modal.Body>
       </Modal>
->>>>>>> Stashed changes
     </Layout>
   );
 }
