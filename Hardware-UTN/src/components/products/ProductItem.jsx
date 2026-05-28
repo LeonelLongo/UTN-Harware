@@ -1,7 +1,7 @@
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-function ProductItem({ id, name, price, image, onAdd, quantityInCart = 0 }) {
+function ProductItem({ id, name, price, image, onAdd, onRemove, quantityInCart = 0 }) {
   const navigate = useNavigate();
 
   return (
@@ -32,13 +32,35 @@ function ProductItem({ id, name, price, image, onAdd, quantityInCart = 0 }) {
           ${price.toLocaleString("es-AR")}
         </span>
 
-        <Button
-          className="mt-3 w-100 fw-semibold"
-          style={{ backgroundColor: "var(--color-accent)", border: "none" }}
-          onClick={(e) => { e.stopPropagation(); onAdd(); }}
-        >
-          {quantityInCart > 0 ? `+ Agregar (${quantityInCart} en carrito)` : "Agregar al carrito"}
-        </Button>
+        {quantityInCart > 0 ? (
+          <div
+            className="mt-3 d-flex align-items-center justify-content-between"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              variant="outline-secondary"
+              style={{ width: "36px", height: "36px", padding: 0, lineHeight: 1 }}
+              onClick={() => onRemove()}
+            >
+              −
+            </Button>
+            <span className="fw-semibold">{quantityInCart} en carrito</span>
+            <Button
+              style={{ width: "36px", height: "36px", padding: 0, lineHeight: 1, backgroundColor: "var(--color-accent)", border: "none" }}
+              onClick={() => onAdd()}
+            >
+              +
+            </Button>
+          </div>
+        ) : (
+          <Button
+            className="mt-3 w-100 fw-semibold"
+            style={{ backgroundColor: "var(--color-accent)", border: "none" }}
+            onClick={(e) => { e.stopPropagation(); onAdd(); }}
+          >
+            Agregar al carrito
+          </Button>
+        )}
       </Card.Body>
     </Card>
   );

@@ -36,6 +36,16 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
     }
   };
 
+  const handleRemoveFromCart = (product) => {
+    const existing = cart.find((p) => p.id === product.id);
+    if (!existing) return;
+    if (existing.quantity === 1) {
+      setCart(cart.filter((p) => p.id !== product.id));
+    } else {
+      setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p));
+    }
+  };
+
   const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
 
   return (
@@ -48,12 +58,17 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
       >
         {carouselImages.map((img, i) => (
           <Carousel.Item key={i}>
-            <img className="d-block w-100" src={img.src} alt={img.alt} />
+            <img
+              className="d-block w-100"
+              src={img.src}
+              alt={img.alt}
+              style={{ aspectRatio: "1919 / 820", objectFit: "cover" }}
+            />
           </Carousel.Item>
         ))}
       </Carousel>
 
-      <ProductList products={filteredProducts} onAdd={handleAddToCart} cart={cart} />
+      <ProductList products={filteredProducts} onAdd={handleAddToCart} onRemove={handleRemoveFromCart} cart={cart} />
 
       <Modal show={showLoginModal} onHide={() => setShowLoginModal(false)} centered>
         <Modal.Body className="text-center py-4 px-4">
