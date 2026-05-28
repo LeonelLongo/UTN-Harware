@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Carousel, Modal, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
 import ProductList from "../products/ProductList";
+import { products } from "../../data/products";
 import carrusel1 from "../../assets/imagenes/carrusel/carrusel1.png";
 import carrusel2 from "../../assets/imagenes/carrusel/carrusel2.png";
 import carrusel3 from "../../assets/imagenes/carrusel/carrusel3.png";
@@ -14,23 +15,12 @@ const carouselImages = [
 ];
 
 function Home({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
-  const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch("http://localhost:3000/items")
-      .then(res => res.json())
-      .then(data => {
-        console.log(data)
-        setProducts([...data])
-      })
-      .catch(err => console.log(err));
-  }, []);
-
   const filteredProducts = products.filter((p) =>
-    p.title.toLowerCase().includes(searchQuery.toLowerCase())
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleAddToCart = (product) => {
@@ -46,6 +36,16 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
     }
   };
 
+  const handleRemoveFromCart = (product) => {
+    const existing = cart.find((p) => p.id === product.id);
+    if (!existing) return;
+    if (existing.quantity === 1) {
+      setCart(cart.filter((p) => p.id !== product.id));
+    } else {
+      setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p));
+    }
+  };
+
   const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
 
   return (
@@ -58,12 +58,17 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
       >
         {carouselImages.map((img, i) => (
           <Carousel.Item key={i}>
-            <img className="d-block w-100" src={img.src} alt={img.alt} />
+            <img
+              className="d-block w-100"
+              src={img.src}
+              alt={img.alt}
+              style={{ aspectRatio: "1919 / 820", objectFit: "cover" }}
+            />
           </Carousel.Item>
         ))}
       </Carousel>
 
-      <ProductList products={filteredProducts} onAdd={handleAddToCart} cart={cart} />
+      <ProductList products={filteredProducts} onAdd={handleAddToCart} onRemove={handleRemoveFromCart} cart={cart} />
 
       <Modal show={showLoginModal} onHide={() => setShowLoginModal(false)} centered>
         <Modal.Body className="text-center py-4 px-4">

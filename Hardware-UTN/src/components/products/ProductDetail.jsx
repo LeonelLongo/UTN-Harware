@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Row, Col, Button, Modal, Card } from "react-bootstrap";
+import { Row, Col, Button, Modal, Card, Badge } from "react-bootstrap";
 import Layout from "../layout/Layout";
 
 function ProductDetail({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
@@ -42,6 +42,16 @@ function ProductDetail({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
     }
   };
 
+  const handleRemoveFromCart = () => {
+    const existing = cart.find((p) => p.id === product.id);
+    if (!existing) return;
+    if (existing.quantity === 1) {
+      setCart(cart.filter((p) => p.id !== product.id));
+    } else {
+      setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p));
+    }
+  };
+
   const quantityInCart = cart.find((p) => p.id === product.id)?.quantity ?? 0;
 
   return (
@@ -72,14 +82,40 @@ function ProductDetail({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
               ${product.value.toLocaleString("es-AR")}
             </p>
 
-            <Button
-              size="lg"
-              className="w-100 fw-semibold mb-4"
-              style={{ backgroundColor: "var(--color-accent)", border: "none" }}
-              onClick={handleAddToCart}
-            >
-              {quantityInCart > 0 ? `+ Agregar (${quantityInCart} en carrito)` : "Agregar al carrito"}
-            </Button>
+            {quantityInCart > 0 ? (
+              <div className="d-flex align-items-center gap-3 mb-4">
+                <Button
+                  size="lg"
+                  variant="outline-secondary"
+                  style={{ width: "48px", height: "48px", padding: 0, lineHeight: 1, flexShrink: 0 }}
+                  onClick={handleRemoveFromCart}
+                >
+                  −
+                </Button>
+                <Badge
+                  className="flex-grow-1 text-center py-3"
+                  style={{ backgroundColor: "var(--color-accent)", fontSize: "1rem" }}
+                >
+                  {quantityInCart} en carrito
+                </Badge>
+                <Button
+                  size="lg"
+                  style={{ width: "48px", height: "48px", padding: 0, lineHeight: 1, flexShrink: 0, backgroundColor: "var(--color-accent)", border: "none" }}
+                  onClick={handleAddToCart}
+                >
+                  +
+                </Button>
+              </div>
+            ) : (
+              <Button
+                size="lg"
+                className="w-100 fw-semibold mb-4"
+                style={{ backgroundColor: "var(--color-accent)", border: "none" }}
+                onClick={handleAddToCart}
+              >
+                Agregar al carrito
+              </Button>
+            )}
 
             {product.summary && (
               <p className="text-muted">{product.summary}</p>

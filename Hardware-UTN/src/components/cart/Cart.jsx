@@ -12,15 +12,21 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
   const [couponError, setCouponError] = useState(false);
   const navigate = useNavigate();
 
-  const handleRemove = (id) => setCart(cart.filter((p) => p.id !== id));
+  const handleRemove = (id) => {
+    setCart(cart.filter((p) => p.id !== id));
+  };
 
-  const handleIncrement = (id) =>
+  const handleIncrement = (id) => {
     setCart(cart.map((p) => (p.id === id ? { ...p, quantity: p.quantity + 1 } : p)));
+  };
 
   const handleDecrement = (id) => {
     const item = cart.find((p) => p.id === id);
-    if (item.quantity === 1) handleRemove(id);
-    else setCart(cart.map((p) => (p.id === id ? { ...p, quantity: p.quantity - 1 } : p)));
+    if (item.quantity === 1) {
+      handleRemove(id);
+    } else {
+      setCart(cart.map((p) => (p.id === id ? { ...p, quantity: p.quantity - 1 } : p)));
+    }
   };
 
   const handleClear = () => {
@@ -86,15 +92,38 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
                         <td className="ps-3 fw-semibold">{p.name}</td>
                         <td className="text-center">
                           <div className="d-flex align-items-center justify-content-center gap-2">
-                            <Button size="sm" variant="outline-secondary" onClick={() => handleDecrement(p.id)} style={{ width: "28px", height: "28px", padding: 0, lineHeight: 1 }}>−</Button>
-                            <Badge bg="secondary" style={{ fontSize: "0.9rem", minWidth: "28px" }}>{p.quantity}</Badge>
-                            <Button size="sm" variant="outline-secondary" onClick={() => handleIncrement(p.id)} style={{ width: "28px", height: "28px", padding: 0, lineHeight: 1 }}>+</Button>
+                            <Button
+                              size="sm"
+                              variant="outline-secondary"
+                              onClick={() => handleDecrement(p.id)}
+                              style={{ width: "28px", height: "28px", padding: 0, lineHeight: 1 }}
+                            >
+                              −
+                            </Button>
+                            <Badge bg="secondary" style={{ fontSize: "0.9rem", minWidth: "28px" }}>
+                              {p.quantity}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              variant="outline-secondary"
+                              onClick={() => handleIncrement(p.id)}
+                              style={{ width: "28px", height: "28px", padding: 0, lineHeight: 1 }}
+                            >
+                              +
+                            </Button>
                           </div>
                         </td>
                         <td className="text-end">${p.price.toLocaleString("es-AR")}</td>
                         <td className="text-end fw-bold">${(p.price * p.quantity).toLocaleString("es-AR")}</td>
                         <td className="text-center">
-                          <Button size="sm" variant="outline-danger" onClick={() => handleRemove(p.id)} title="Eliminar">✕</Button>
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            onClick={() => handleRemove(p.id)}
+                            title="Eliminar"
+                          >
+                            ✕
+                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -102,7 +131,9 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
                 </Table>
               </Card.Body>
               <Card.Footer className="text-end">
-                <Button variant="outline-danger" size="sm" onClick={handleClear}>Vaciar carrito</Button>
+                <Button variant="outline-danger" size="sm" onClick={handleClear}>
+                  Vaciar carrito
+                </Button>
               </Card.Footer>
             </Card>
           </Col>
@@ -115,7 +146,9 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
               <Card.Body>
                 {cart.map((p) => (
                   <div key={p.id} className="d-flex justify-content-between mb-2 small">
-                    <span className="text-muted">{p.name} x{p.quantity}</span>
+                    <span className="text-muted">
+                      {p.name} x{p.quantity}
+                    </span>
                     <span>${(p.price * p.quantity).toLocaleString("es-AR")}</span>
                   </div>
                 ))}
@@ -135,19 +168,37 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
                         isInvalid={couponError}
                         size="sm"
                       />
-                      <Button size="sm" style={{ backgroundColor: "var(--color-accent)", border: "none" }} onClick={handleApplyCoupon}>
+                      <Button
+                        size="sm"
+                        style={{ backgroundColor: "var(--color-accent)", border: "none" }}
+                        onClick={handleApplyCoupon}
+                      >
                         Aplicar
                       </Button>
                     </InputGroup>
-                    {couponError && <p className="text-danger small mb-2">Cupón inválido.</p>}
+                    {couponError && (
+                      <p className="text-danger small mb-2">Cupón inválido.</p>
+                    )}
                   </>
                 ) : (
-                  <div className="rounded p-3 mb-2" style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                  <div
+                    className="rounded p-3 mb-2"
+                    style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}
+                  >
                     <div className="d-flex justify-content-between align-items-center mb-2">
-                      <span className="fw-semibold small text-success">✓ Cupón {CUPON_VALIDO} aplicado</span>
-                      <button onClick={handleRemoveCoupon} style={{ background: "none", border: "none", color: "#6b7280", cursor: "pointer", fontSize: "0.8rem" }}>Quitar</button>
+                      <span className="fw-semibold small text-success">
+                        ✓ Cupón {CUPON_VALIDO} aplicado
+                      </span>
+                      <button
+                        onClick={handleRemoveCoupon}
+                        style={{ background: "none", border: "none", color: "#6b7280", cursor: "pointer", fontSize: "0.8rem" }}
+                      >
+                        Quitar
+                      </button>
                     </div>
-                    <p className="small text-muted mb-1">{CUOTAS} cuotas sin interés de:</p>
+                    <p className="small text-muted mb-1">
+                      {CUOTAS} cuotas sin interés de:
+                    </p>
                     <p className="fw-bold fs-5 mb-0" style={{ color: "var(--color-accent)" }}>
                       ${Number(cuotaValor).toLocaleString("es-AR")} / cuota
                     </p>
