@@ -1,15 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Row, Col, Button, Modal, Card, Badge } from "react-bootstrap";
 import Layout from "../layout/Layout";
-import { products } from "../../data/products";
 
 function ProductDetail({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  const product = products.find((p) => p.id === Number(id));
+  const [product, setProduct] = useState(null)
+  useEffect(() => {
+    fetch(`http://localhost:3000/items/${id}`)
+      .then(res => res.json())
+      .then(data => setProduct(data))
+      .catch(err => console.log(err))
+  }, [id])
+
   const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
 
   if (!product) {
@@ -63,17 +69,17 @@ function ProductDetail({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
           <Col md={6} className="text-center">
             <div style={{ backgroundColor: "#f8f8f8", borderRadius: "var(--border-radius)", padding: "32px" }}>
               <img
-                src={product.image}
-                alt={product.name}
+                src={product.imageUrl}
+                alt={product.title}
                 style={{ maxWidth: "100%", maxHeight: "320px", objectFit: "contain" }}
               />
             </div>
           </Col>
 
           <Col md={6}>
-            <h2 className="fw-bold mb-3">{product.name}</h2>
+            <h2 className="fw-bold mb-3">{product.title}</h2>
             <p className="fw-bold mb-4" style={{ color: "var(--color-accent)", fontSize: "2rem" }}>
-              ${product.price.toLocaleString("es-AR")}
+              ${product.value.toLocaleString("es-AR")}
             </p>
 
             {quantityInCart > 0 ? (
@@ -111,20 +117,8 @@ function ProductDetail({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
               </Button>
             )}
 
-            {product.specs.length > 0 && (
-              <div>
-                <h5 className="fw-bold mb-3">Especificaciones técnicas</h5>
-                <table className="table table-sm table-bordered">
-                  <tbody>
-                    {product.specs.map((spec, i) => (
-                      <tr key={i}>
-                        <td className="fw-semibold text-muted" style={{ width: "40%" }}>{spec.label}</td>
-                        <td>{spec.value}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            {product.summary && (
+              <p className="text-muted">{product.summary}</p>
             )}
           </Col>
         </Row>
