@@ -1,8 +1,7 @@
-import { Navigate } from "react-router-dom";
-
-function Protected({ isSignedIn, children }) {
+function Protected({ isSignedIn, children, setShowLogin }) {
   if (!isSignedIn) {
-    return <Navigate to="/login" />;
+    if (setShowLogin) setShowLogin(true);
+    return null;
   }
 
   return children;
