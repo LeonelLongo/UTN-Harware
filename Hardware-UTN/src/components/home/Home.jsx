@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Carousel, Modal, Button } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { Carousel } from "react-bootstrap";
 import Layout from "../layout/Layout";
 import ProductList from "../products/ProductList";
 import { products } from "../../data/products";
@@ -14,23 +13,25 @@ const carouselImages = [
   { src: carrusel3, alt: "Promoción 3" },
 ];
 
-function Home({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
+function Home({ cart, setCart, isLoggedIn, setIsLoggedIn, setShowLogin }) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const navigate = useNavigate();
 
   const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleAddToCart = (product) => {
     if (!isLoggedIn) {
-      setShowLoginModal(true);
+      setShowLogin(true);
       return;
     }
     const existing = cart.find((p) => p.id === product.id);
     if (existing) {
-      setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p));
+      setCart(
+        cart.map((p) =>
+          p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p,
+        ),
+      );
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
@@ -42,14 +43,24 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
     if (existing.quantity === 1) {
       setCart(cart.filter((p) => p.id !== product.id));
     } else {
-      setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p));
+      setCart(
+        cart.map((p) =>
+          p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p,
+        ),
+      );
     }
   };
 
   const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
 
   return (
-    <Layout cartCount={cartCount} onSearchChange={setSearchQuery} isLoggedIn={isLoggedIn} onLogout={() => setIsLoggedIn(false)}>
+    <Layout
+      cartCount={cartCount}
+      onSearchChange={setSearchQuery}
+      isLoggedIn={isLoggedIn}
+      onLogout={() => setIsLoggedIn(false)}
+      setShowLogin={setShowLogin}
+    >
       <Carousel
         controls={false}
         interval={5000}
@@ -68,22 +79,12 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
         ))}
       </Carousel>
 
-      <ProductList products={filteredProducts} onAdd={handleAddToCart} onRemove={handleRemoveFromCart} cart={cart} />
-
-      <Modal show={showLoginModal} onHide={() => setShowLoginModal(false)} centered>
-        <Modal.Body className="text-center py-4 px-4">
-          <div style={{ fontSize: "2.5rem", marginBottom: "12px" }}>🔒</div>
-          <p className="fw-semibold fs-5 mb-4">
-            Para continuar con el proceso de compra debe iniciar sesión
-          </p>
-          <Button
-            style={{ backgroundColor: "var(--color-accent)", border: "none" }}
-            onClick={() => navigate("/login")}
-          >
-            Iniciar sesión
-          </Button>
-        </Modal.Body>
-      </Modal>
+      <ProductList
+        products={filteredProducts}
+        onAdd={handleAddToCart}
+        onRemove={handleRemoveFromCart}
+        cart={cart}
+      />
     </Layout>
   );
 }

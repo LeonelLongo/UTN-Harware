@@ -1,8 +1,16 @@
 import { useState } from "react";
 import { Container } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
+import Footer from "./Footer";
 
-function Layout({ children, cartCount = 0, onSearchChange = null, isLoggedIn = false, onLogout = null }) {
+function Layout({
+  children,
+  cartCount = 0,
+  onSearchChange = null,
+  isLoggedIn = false,
+  onLogout = null,
+  setShowLogin,
+}) {
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState("");
 
@@ -16,7 +24,15 @@ function Layout({ children, cartCount = 0, onSearchChange = null, isLoggedIn = f
 
   return (
     <>
-      <div style={{ backgroundColor: "var(--color-header)", color: "white", position: "sticky", top: 0, zIndex: 1000 }}>
+      <div
+        style={{
+          backgroundColor: "var(--color-header)",
+          color: "white",
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+        }}
+      >
         <Container
           style={{
             display: "flex",
@@ -38,7 +54,13 @@ function Layout({ children, cartCount = 0, onSearchChange = null, isLoggedIn = f
             }}
           >
             <img src="/logo.png" alt="logo" style={{ width: "40px" }} />
-            <span style={{ fontWeight: 700, fontSize: "1.1rem", color: "var(--color-accent)" }}>
+            <span
+              style={{
+                fontWeight: 700,
+                fontSize: "1.1rem",
+                color: "var(--color-accent)",
+              }}
+            >
               Hardware UTN
             </span>
           </Link>
@@ -75,7 +97,16 @@ function Layout({ children, cartCount = 0, onSearchChange = null, isLoggedIn = f
                   color: "white",
                 }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <circle cx="11" cy="11" r="8" />
                   <line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
@@ -83,10 +114,20 @@ function Layout({ children, cartCount = 0, onSearchChange = null, isLoggedIn = f
             </div>
           )}
 
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              flexShrink: 0,
+            }}
+          >
             {isLoggedIn ? (
               <button
-                onClick={() => { onLogout?.(); navigate("/"); }}
+                onClick={() => {
+                  onLogout?.();
+                  navigate("/");
+                }}
                 style={{
                   background: "none",
                   color: "white",
@@ -101,20 +142,21 @@ function Layout({ children, cartCount = 0, onSearchChange = null, isLoggedIn = f
                 Cerrar sesión
               </button>
             ) : (
-              <Link
-                to="/login"
+              <button
+                onClick={() => setShowLogin?.(true)}
                 style={{
-                  textDecoration: "none",
+                  background: "none",
                   color: "white",
                   padding: "8px 16px",
                   borderRadius: "var(--border-radius)",
                   fontWeight: 600,
                   fontSize: "0.95rem",
                   border: "1px solid white",
+                  cursor: "pointer",
                 }}
               >
                 Iniciar sesión
-              </Link>
+              </button>
             )}
 
             <Link
@@ -156,9 +198,16 @@ function Layout({ children, cartCount = 0, onSearchChange = null, isLoggedIn = f
         </Container>
       </div>
 
-      <div style={{ backgroundColor: "var(--color-background)", minHeight: "calc(100vh - 64px)", padding: "24px 0" }}>
+      <div
+        style={{
+          backgroundColor: "var(--color-background)",
+          minHeight: "calc(100vh - 64px)",
+          padding: "24px 0",
+        }}
+      >
         <Container>{children}</Container>
       </div>
+      <Footer />
     </>
   );
 }
