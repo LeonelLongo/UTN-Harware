@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Carousel } from "react-bootstrap";
 import Layout from "../layout/Layout";
 import ProductList from "../products/ProductList";
+import LoginPrompt from "../auth/LoginPrompt";
 import { products } from "../../data/products";
 import carrusel1 from "../../assets/imagenes/carrusel/carrusel1.png";
 import carrusel2 from "../../assets/imagenes/carrusel/carrusel2.png";
@@ -15,6 +16,7 @@ const carouselImages = [
 
 function Home({ cart, setCart, isLoggedIn, setIsLoggedIn, setShowLogin }) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showPrompt, setShowPrompt] = useState(false);
 
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -22,16 +24,12 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn, setShowLogin }) {
 
   const handleAddToCart = (product) => {
     if (!isLoggedIn) {
-      setShowLogin(true);
+      setShowPrompt(true);
       return;
     }
     const existing = cart.find((p) => p.id === product.id);
     if (existing) {
-      setCart(
-        cart.map((p) =>
-          p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p,
-        ),
-      );
+      setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p));
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
@@ -43,11 +41,7 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn, setShowLogin }) {
     if (existing.quantity === 1) {
       setCart(cart.filter((p) => p.id !== product.id));
     } else {
-      setCart(
-        cart.map((p) =>
-          p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p,
-        ),
-      );
+      setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p));
     }
   };
 
@@ -61,6 +55,13 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn, setShowLogin }) {
       onLogout={() => setIsLoggedIn(false)}
       setShowLogin={setShowLogin}
     >
+      {showPrompt && (
+        <LoginPrompt
+          onClose={() => setShowPrompt(false)}
+          onLogin={() => { setShowPrompt(false); setShowLogin(true); }}
+        />
+      )}
+
       <Carousel
         controls={false}
         interval={5000}

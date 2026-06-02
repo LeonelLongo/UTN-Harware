@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Container } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "./Footer";
+import LoginPrompt from "../auth/LoginPrompt";
 
 function Layout({
   children,
@@ -13,6 +14,7 @@ function Layout({
 }) {
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState("");
+  const [showCartPrompt, setShowCartPrompt] = useState(false);
 
   const handleSearch = () => {
     if (onSearchChange) onSearchChange(inputValue);
@@ -22,8 +24,22 @@ function Layout({
     if (e.key === "Enter") handleSearch();
   };
 
+  const handleCartClick = (e) => {
+    if (!isLoggedIn) {
+      e.preventDefault();
+      setShowCartPrompt(true);
+    }
+  };
+
   return (
     <>
+      {showCartPrompt && (
+        <LoginPrompt
+          onClose={() => setShowCartPrompt(false)}
+          onLogin={() => { setShowCartPrompt(false); setShowLogin?.(true); }}
+        />
+      )}
+
       <div
         style={{
           backgroundColor: "var(--color-header)",
@@ -124,10 +140,7 @@ function Layout({
           >
             {isLoggedIn ? (
               <button
-                onClick={() => {
-                  onLogout?.();
-                  navigate("/");
-                }}
+                onClick={() => { onLogout?.(); navigate("/"); }}
                 style={{
                   background: "none",
                   color: "white",
@@ -161,6 +174,7 @@ function Layout({
 
             <Link
               to="/cart"
+              onClick={handleCartClick}
               style={{
                 display: "flex",
                 alignItems: "center",
