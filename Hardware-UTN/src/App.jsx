@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 import Terminos from "./components/terminos/Terminos";
@@ -11,14 +11,20 @@ import Admin from "./components/admin/Admin";
 import Protected from "./components/auth/Protected";
 import NotFound from "./components/notFound/NotFound";
 import ProductDetail from "./components/products/ProductDetail";
-import { products as initialProducts } from "./data/products";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [cart, setCart] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:3000/items")
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch((err) => console.log(err));
+  }, []);
 
   const handleLogout = () => {
     setIsLoggedIn(false);

@@ -18,7 +18,7 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn, onLogout, setShowLogin
   const [showPrompt, setShowPrompt] = useState(false);
 
   const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    p.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleAddToCart = (product) => {

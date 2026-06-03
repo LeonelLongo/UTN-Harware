@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Table, Button, Modal, Form, Badge } from "react-bootstrap";
 import Layout from "../layout/Layout";
 
-const emptyForm = { title: "", value: "", imageUrl: "", summary: "" };
+const emptyForm = { title: "", value: "", imageUrl: "" };
 
 function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
   const [showModal, setShowModal] = useState(false);
@@ -18,7 +18,7 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
 
   const openEdit = (product) => {
     setEditingProduct(product);
-    setForm({ title: product.title, value: product.value, imageUrl: product.imageUrl, summary: product.summary || "" });
+    setForm({ title: product.title, value: product.value, imageUrl: product.imageUrl });
     setShowModal(true);
   };
 
@@ -29,7 +29,6 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
       title: form.title,
       value: Number(form.value),
       imageUrl: form.imageUrl,
-      summary: form.summary,
     };
 
     if (editingProduct) {
@@ -83,7 +82,9 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
         <tbody>
           {products.map((p) => (
             <tr key={p.id} className="align-middle">
-              <td><Badge bg="secondary">{p.id}</Badge></td>
+              <td>
+                <Badge bg="secondary">{p.id}</Badge>
+              </td>
               <td className="fw-semibold">{p.title}</td>
               <td style={{ color: "var(--color-accent)", fontWeight: 600 }}>
                 ${p.value.toLocaleString("es-AR")}
@@ -93,7 +94,11 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
                   <img
                     src={p.imageUrl}
                     alt={p.title}
-                    style={{ width: "50px", height: "50px", objectFit: "contain" }}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      objectFit: "contain",
+                    }}
                   />
                 ) : (
                   <span className="text-muted small">Sin imagen</span>
@@ -155,7 +160,7 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
               <Form.Label className="fw-semibold">URL de imagen</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="https://..."
+                placeholder="https://... o ruta local"
                 value={form.imageUrl}
                 onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
               />
@@ -204,8 +209,10 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
         </Modal.Header>
         <Modal.Body>
           ¿Estás seguro que querés eliminar{" "}
-          <strong>{products.find((p) => p.id === showDeleteConfirm)?.title}</strong>?{" "}
-          Esta acción no se puede deshacer.
+          <strong>
+            {products.find((p) => p.id === showDeleteConfirm)?.title}
+          </strong>
+          ? Esta acción no se puede deshacer.
         </Modal.Body>
         <Modal.Footer>
           <Button variant="outline-secondary" onClick={() => setShowDeleteConfirm(null)}>
