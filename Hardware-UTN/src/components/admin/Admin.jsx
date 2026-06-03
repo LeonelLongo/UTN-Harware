@@ -70,9 +70,7 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
       </div>
 
       <Table responsive hover className="shadow-sm">
-        <thead
-          style={{ backgroundColor: "var(--color-header)", color: "white" }}
-        >
+        <thead style={{ backgroundColor: "var(--color-header)", color: "white" }}>
           <tr>
             <th style={{ width: "60px" }}>#</th>
             <th>Nombre</th>
@@ -108,18 +106,10 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
               </td>
               <td className="text-center">
                 <div className="d-flex gap-2 justify-content-center">
-                  <Button
-                    size="sm"
-                    variant="outline-primary"
-                    onClick={() => openEdit(p)}
-                  >
+                  <Button size="sm" variant="outline-primary" onClick={() => openEdit(p)}>
                     Editar
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline-danger"
-                    onClick={() => setShowDeleteConfirm(p.id)}
-                  >
+                  <Button size="sm" variant="outline-danger" onClick={() => setShowDeleteConfirm(p.id)}>
                     Eliminar
                   </Button>
                 </div>
@@ -137,6 +127,7 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
         </tbody>
       </Table>
 
+      {/* Modal agregar / editar */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold">
@@ -179,20 +170,26 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
                     src={form.imageUrl}
                     alt="preview"
                     style={{ maxHeight: "100px", objectFit: "contain" }}
-                    onError={(e) => {
-                      e.target.style.display = "none";
-                    }}
+                    onError={(e) => { e.target.style.display = "none"; }}
                   />
                 </div>
               )}
             </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Descripción</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Descripción breve del producto..."
+                value={form.summary}
+                onChange={(e) => setForm({ ...form, summary: e.target.value })}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="outline-secondary"
-            onClick={() => setShowModal(false)}
-          >
+          <Button variant="outline-secondary" onClick={() => setShowModal(false)}>
             Cancelar
           </Button>
           <Button
@@ -205,11 +202,8 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
         </Modal.Footer>
       </Modal>
 
-      <Modal
-        show={showDeleteConfirm !== null}
-        onHide={() => setShowDeleteConfirm(null)}
-        centered
-      >
+      {/* Modal confirmar eliminación */}
+      <Modal show={showDeleteConfirm !== null} onHide={() => setShowDeleteConfirm(null)} centered>
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold">Confirmar eliminación</Modal.Title>
         </Modal.Header>
@@ -221,16 +215,10 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
           ? Esta acción no se puede deshacer.
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="outline-secondary"
-            onClick={() => setShowDeleteConfirm(null)}
-          >
+          <Button variant="outline-secondary" onClick={() => setShowDeleteConfirm(null)}>
             Cancelar
           </Button>
-          <Button
-            variant="danger"
-            onClick={() => handleDelete(showDeleteConfirm)}
-          >
+          <Button variant="danger" onClick={() => handleDelete(showDeleteConfirm)}>
             Eliminar
           </Button>
         </Modal.Footer>

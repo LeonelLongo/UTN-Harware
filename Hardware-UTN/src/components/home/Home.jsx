@@ -13,16 +13,7 @@ const carouselImages = [
   { src: carrusel3, alt: "Promoción 3" },
 ];
 
-function Home({
-  cart,
-  setCart,
-  isLoggedIn,
-  setIsLoggedIn,
-  onLogout,
-  setShowLogin,
-  isAdmin,
-  products,
-}) {
+function Home({ cart, setCart, isLoggedIn, setIsLoggedIn, onLogout, setShowLogin, isAdmin, products }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showPrompt, setShowPrompt] = useState(false);
 
@@ -37,11 +28,7 @@ function Home({
     }
     const existing = cart.find((p) => p.id === product.id);
     if (existing) {
-      setCart(
-        cart.map((p) =>
-          p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p,
-        ),
-      );
+      setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p));
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
@@ -53,11 +40,7 @@ function Home({
     if (existing.quantity === 1) {
       setCart(cart.filter((p) => p.id !== product.id));
     } else {
-      setCart(
-        cart.map((p) =>
-          p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p,
-        ),
-      );
+      setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p));
     }
   };
 
@@ -75,10 +58,7 @@ function Home({
       {showPrompt && (
         <LoginPrompt
           onClose={() => setShowPrompt(false)}
-          onLogin={() => {
-            setShowPrompt(false);
-            setShowLogin(true);
-          }}
+          onLogin={() => { setShowPrompt(false); setShowLogin(true); }}
         />
       )}
 

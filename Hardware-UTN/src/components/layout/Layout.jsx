@@ -37,10 +37,7 @@ function Layout({
       {showCartPrompt && (
         <LoginPrompt
           onClose={() => setShowCartPrompt(false)}
-          onLogin={() => {
-            setShowCartPrompt(false);
-            setShowLogin?.(true);
-          }}
+          onLogin={() => { setShowCartPrompt(false); setShowLogin?.(true); }}
         />
       )}
 
@@ -163,10 +160,7 @@ function Layout({
           >
             {isLoggedIn ? (
               <button
-                onClick={() => {
-                  onLogout?.();
-                  navigate("/");
-                }}
+                onClick={() => { onLogout?.(); navigate("/"); }}
                 style={{
                   background: "none",
                   color: "white",

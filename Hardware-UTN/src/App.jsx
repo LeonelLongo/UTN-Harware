@@ -89,28 +89,14 @@ function App() {
         <Route
           path="/admin"
           element={
-            isAdmin ? (
-              <Admin
-                products={products}
-                setProducts={setProducts}
-                isLoggedIn={isLoggedIn}
-                onLogout={handleLogout}
-                isAdmin={isAdmin}
-              />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            isAdmin
+              ? <Admin products={products} setProducts={setProducts} isLoggedIn={isLoggedIn} onLogout={handleLogout} isAdmin={isAdmin} />
+              : <Navigate to="/" replace />
           }
         />
 
-        <Route
-          path="/terminos"
-          element={<Terminos setShowLogin={setShowLogin} />}
-        />
-        <Route
-          path="/quienes-somos"
-          element={<QuienesSomos setShowLogin={setShowLogin} />}
-        />
+        <Route path="/terminos" element={<Terminos setShowLogin={setShowLogin} />} />
+        <Route path="/quienes-somos" element={<QuienesSomos setShowLogin={setShowLogin} />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
