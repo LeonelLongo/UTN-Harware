@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Carousel } from "react-bootstrap";
 import Layout from "../layout/Layout";
 import ProductList from "../products/ProductList";
-import { products } from "../../data/products";
+import LoginPrompt from "../auth/LoginPrompt";
 import carrusel1 from "../../assets/imagenes/carrusel/carrusel1.png";
 import carrusel2 from "../../assets/imagenes/carrusel/carrusel2.png";
 import carrusel3 from "../../assets/imagenes/carrusel/carrusel3.png";
@@ -13,8 +13,18 @@ const carouselImages = [
   { src: carrusel3, alt: "Promoción 3" },
 ];
 
-function Home({ cart, setCart, isLoggedIn, setIsLoggedIn, setShowLogin }) {
+function Home({
+  cart,
+  setCart,
+  isLoggedIn,
+  setIsLoggedIn,
+  onLogout,
+  setShowLogin,
+  isAdmin,
+  products,
+}) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showPrompt, setShowPrompt] = useState(false);
 
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -22,7 +32,7 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn, setShowLogin }) {
 
   const handleAddToCart = (product) => {
     if (!isLoggedIn) {
-      setShowLogin(true);
+      setShowPrompt(true);
       return;
     }
     const existing = cart.find((p) => p.id === product.id);
@@ -58,9 +68,20 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn, setShowLogin }) {
       cartCount={cartCount}
       onSearchChange={setSearchQuery}
       isLoggedIn={isLoggedIn}
-      onLogout={() => setIsLoggedIn(false)}
+      onLogout={onLogout}
       setShowLogin={setShowLogin}
+      isAdmin={isAdmin}
     >
+      {showPrompt && (
+        <LoginPrompt
+          onClose={() => setShowPrompt(false)}
+          onLogin={() => {
+            setShowPrompt(false);
+            setShowLogin(true);
+          }}
+        />
+      )}
+
       <Carousel
         controls={false}
         interval={5000}
