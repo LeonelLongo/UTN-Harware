@@ -16,9 +16,9 @@ function ProductList({ products, onAdd, onRemove, cart = [] }) {
         <Col xs={12} sm={6} md={4} key={product.id}>
           <ProductItem
             id={product.id}
-            name={product.name}
-            price={product.price}
-            image={product.image}
+            name={product.title}
+            price={product.value}
+            image={product.imageUrl}
             onAdd={() => onAdd(product)}
             onRemove={() => onRemove(product)}
             quantityInCart={getQty(product.id)}
