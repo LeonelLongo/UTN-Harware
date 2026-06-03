@@ -2,17 +2,20 @@ import { useState } from "react";
 import { Container } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "./Footer";
+import LoginPrompt from "../auth/LoginPrompt";
 
 function Layout({
   children,
   cartCount = 0,
   onSearchChange = null,
   isLoggedIn = false,
+  isAdmin = false,
   onLogout = null,
   setShowLogin,
 }) {
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState("");
+  const [showCartPrompt, setShowCartPrompt] = useState(false);
 
   const handleSearch = () => {
     if (onSearchChange) onSearchChange(inputValue);
@@ -22,8 +25,25 @@ function Layout({
     if (e.key === "Enter") handleSearch();
   };
 
+  const handleCartClick = (e) => {
+    if (!isLoggedIn) {
+      e.preventDefault();
+      setShowCartPrompt(true);
+    }
+  };
+
   return (
     <>
+      {showCartPrompt && (
+        <LoginPrompt
+          onClose={() => setShowCartPrompt(false)}
+          onLogin={() => {
+            setShowCartPrompt(false);
+            setShowLogin?.(true);
+          }}
+        />
+      )}
+
       <div
         style={{
           backgroundColor: "var(--color-header)",
@@ -64,6 +84,25 @@ function Layout({
               Hardware UTN
             </span>
           </Link>
+
+          {isAdmin && (
+            <Link
+              to="/admin"
+              style={{
+                textDecoration: "none",
+                color: "white",
+                padding: "8px 16px",
+                borderRadius: "var(--border-radius)",
+                fontWeight: 600,
+                fontSize: "0.95rem",
+                border: "1px solid var(--color-accent)",
+                backgroundColor: "transparent",
+                flexShrink: 0,
+              }}
+            >
+              Productos
+            </Link>
+          )}
 
           {onSearchChange && (
             <div style={{ flex: 1, maxWidth: "400px", display: "flex" }}>
@@ -161,6 +200,7 @@ function Layout({
 
             <Link
               to="/cart"
+              onClick={handleCartClick}
               style={{
                 display: "flex",
                 alignItems: "center",

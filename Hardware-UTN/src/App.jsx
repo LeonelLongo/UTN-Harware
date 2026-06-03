@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 import Terminos from "./components/terminos/Terminos";
 import QuienesSomos from "./components/quienesSomos/QuienesSomos";
@@ -11,17 +11,27 @@ import Admin from "./components/admin/Admin";
 import Protected from "./components/auth/Protected";
 import NotFound from "./components/notFound/NotFound";
 import ProductDetail from "./components/products/ProductDetail";
+import { products as initialProducts } from "./data/products";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [cart, setCart] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
+  const [products, setProducts] = useState(initialProducts);
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setIsAdmin(false);
+    setCart([]);
+  };
 
   return (
     <BrowserRouter>
       {showLogin && (
         <Login
           setIsLoggedIn={setIsLoggedIn}
+          setIsAdmin={setIsAdmin}
           onClose={() => setShowLogin(false)}
         />
       )}
@@ -35,7 +45,10 @@ function App() {
               setCart={setCart}
               isLoggedIn={isLoggedIn}
               setIsLoggedIn={setIsLoggedIn}
+              onLogout={handleLogout}
               setShowLogin={setShowLogin}
+              isAdmin={isAdmin}
+              products={products}
             />
           }
         />
@@ -70,9 +83,17 @@ function App() {
         <Route
           path="/admin"
           element={
-            <Protected isSignedIn={isLoggedIn} setShowLogin={setShowLogin}>
-              <Admin />
-            </Protected>
+            isAdmin ? (
+              <Admin
+                products={products}
+                setProducts={setProducts}
+                isLoggedIn={isLoggedIn}
+                onLogout={handleLogout}
+                isAdmin={isAdmin}
+              />
+            ) : (
+              <Navigate to="/" replace />
+            )
           }
         />
 
@@ -84,7 +105,6 @@ function App() {
           path="/quienes-somos"
           element={<QuienesSomos setShowLogin={setShowLogin} />}
         />
-
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
