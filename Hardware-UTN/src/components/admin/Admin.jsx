@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Table, Button, Modal, Form, Badge } from "react-bootstrap";
 import Layout from "../layout/Layout";
 
-const emptyForm = { name: "", price: "", image: "", summary: "" };
+const emptyForm = { title: "", value: "", imageUrl: "", summary: "" };
 
 function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
   const [showModal, setShowModal] = useState(false);
@@ -18,44 +18,48 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
 
   const openEdit = (product) => {
     setEditingProduct(product);
-    setForm({ name: product.name, price: product.price, image: product.image, summary: product.summary || "" });
+    setForm({ title: product.title, value: product.value, imageUrl: product.imageUrl, summary: product.summary || "" });
     setShowModal(true);
   };
 
-  const handleSave = () => {
-    if (!form.name.trim() || !form.price) return;
+  const handleSave = async () => {
+    if (!form.title.trim() || !form.value) return;
+
+    const body = {
+      title: form.title,
+      value: Number(form.value),
+      imageUrl: form.imageUrl,
+      summary: form.summary,
+    };
 
     if (editingProduct) {
-      setProducts(products.map((p) =>
-        p.id === editingProduct.id
-          ? { ...p, name: form.name, price: Number(form.price), image: form.image, summary: form.summary }
-          : p
-      ));
+      const res = await fetch(`http://localhost:3000/items/${editingProduct.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const updated = await res.json();
+      setProducts(products.map((p) => (p.id === editingProduct.id ? updated : p)));
     } else {
-      const newId = Math.max(0, ...products.map((p) => p.id)) + 1;
-      setProducts([...products, {
-        id: newId,
-        name: form.name,
-        price: Number(form.price),
-        image: form.image,
-        summary: form.summary,
-        specs: [],
-      }]);
+      const res = await fetch("http://localhost:3000/items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const created = await res.json();
+      setProducts([...products, created]);
     }
     setShowModal(false);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
+    await fetch(`http://localhost:3000/items/${id}`, { method: "DELETE" });
     setProducts(products.filter((p) => p.id !== id));
     setShowDeleteConfirm(null);
   };
 
   return (
-    <Layout
-      isLoggedIn={isLoggedIn}
-      isAdmin={isAdmin}
-      onLogout={onLogout}
-    >
+    <Layout isLoggedIn={isLoggedIn} isAdmin={isAdmin} onLogout={onLogout}>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="fw-bold mb-0">Panel de administración</h4>
         <Button
@@ -79,18 +83,16 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
         <tbody>
           {products.map((p) => (
             <tr key={p.id} className="align-middle">
-              <td>
-                <Badge bg="secondary">{p.id}</Badge>
-              </td>
-              <td className="fw-semibold">{p.name}</td>
+              <td><Badge bg="secondary">{p.id}</Badge></td>
+              <td className="fw-semibold">{p.title}</td>
               <td style={{ color: "var(--color-accent)", fontWeight: 600 }}>
-                ${p.price.toLocaleString("es-AR")}
+                ${p.value.toLocaleString("es-AR")}
               </td>
               <td>
-                {p.image ? (
+                {p.imageUrl ? (
                   <img
-                    src={p.image}
-                    alt={p.name}
+                    src={p.imageUrl}
+                    alt={p.title}
                     style={{ width: "50px", height: "50px", objectFit: "contain" }}
                   />
                 ) : (
@@ -99,18 +101,10 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
               </td>
               <td className="text-center">
                 <div className="d-flex gap-2 justify-content-center">
-                  <Button
-                    size="sm"
-                    variant="outline-primary"
-                    onClick={() => openEdit(p)}
-                  >
+                  <Button size="sm" variant="outline-primary" onClick={() => openEdit(p)}>
                     Editar
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline-danger"
-                    onClick={() => setShowDeleteConfirm(p.id)}
-                  >
+                  <Button size="sm" variant="outline-danger" onClick={() => setShowDeleteConfirm(p.id)}>
                     Eliminar
                   </Button>
                 </div>
@@ -142,8 +136,8 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
               <Form.Control
                 type="text"
                 placeholder="Ej: RTX 4090"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
               />
             </Form.Group>
 
@@ -152,8 +146,8 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
               <Form.Control
                 type="number"
                 placeholder="Ej: 500000"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
+                value={form.value}
+                onChange={(e) => setForm({ ...form, value: e.target.value })}
               />
             </Form.Group>
 
@@ -161,14 +155,14 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
               <Form.Label className="fw-semibold">URL de imagen</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="https://... o ruta local"
-                value={form.image}
-                onChange={(e) => setForm({ ...form, image: e.target.value })}
+                placeholder="https://..."
+                value={form.imageUrl}
+                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
               />
-              {form.image && (
+              {form.imageUrl && (
                 <div className="mt-2 text-center">
                   <img
-                    src={form.image}
+                    src={form.imageUrl}
                     alt="preview"
                     style={{ maxHeight: "100px", objectFit: "contain" }}
                     onError={(e) => { e.target.style.display = "none"; }}
@@ -196,7 +190,7 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
           <Button
             style={{ backgroundColor: "var(--color-accent)", border: "none" }}
             onClick={handleSave}
-            disabled={!form.name.trim() || !form.price}
+            disabled={!form.title.trim() || !form.value}
           >
             {editingProduct ? "Guardar cambios" : "Agregar"}
           </Button>
@@ -210,7 +204,7 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
         </Modal.Header>
         <Modal.Body>
           ¿Estás seguro que querés eliminar{" "}
-          <strong>{products.find((p) => p.id === showDeleteConfirm)?.name}</strong>?
+          <strong>{products.find((p) => p.id === showDeleteConfirm)?.title}</strong>?{" "}
           Esta acción no se puede deshacer.
         </Modal.Body>
         <Modal.Footer>
