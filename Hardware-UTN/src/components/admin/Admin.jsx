@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Table, Button, Modal, Form, Badge } from "react-bootstrap";
 import Layout from "../layout/Layout";
 
-const emptyForm = { name: "", price: "", image: "" };
+const emptyForm = { name: "", price: "", image: "", summary: "" };
 
 function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
   const [showModal, setShowModal] = useState(false);
@@ -18,7 +18,7 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
 
   const openEdit = (product) => {
     setEditingProduct(product);
-    setForm({ name: product.name, price: product.price, image: product.image });
+    setForm({ name: product.name, price: product.price, image: product.image, summary: product.summary || "" });
     setShowModal(true);
   };
 
@@ -28,7 +28,7 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
     if (editingProduct) {
       setProducts(products.map((p) =>
         p.id === editingProduct.id
-          ? { ...p, name: form.name, price: Number(form.price), image: form.image }
+          ? { ...p, name: form.name, price: Number(form.price), image: form.image, summary: form.summary }
           : p
       ));
     } else {
@@ -38,6 +38,7 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
         name: form.name,
         price: Number(form.price),
         image: form.image,
+        summary: form.summary,
         specs: [],
       }]);
     }
@@ -174,6 +175,17 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
                   />
                 </div>
               )}
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Descripción</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Descripción breve del producto..."
+                value={form.summary}
+                onChange={(e) => setForm({ ...form, summary: e.target.value })}
+              />
             </Form.Group>
           </Form>
         </Modal.Body>
