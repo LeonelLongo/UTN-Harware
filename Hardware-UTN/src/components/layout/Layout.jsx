@@ -9,6 +9,7 @@ function Layout({
   cartCount = 0,
   onSearchChange = null,
   isLoggedIn = false,
+  isAdmin = false,
   onLogout = null,
   setShowLogin,
 }) {
@@ -80,6 +81,25 @@ function Layout({
               Hardware UTN
             </span>
           </Link>
+
+          {isAdmin && (
+            <Link
+              to="/admin"
+              style={{
+                textDecoration: "none",
+                color: "white",
+                padding: "8px 16px",
+                borderRadius: "var(--border-radius)",
+                fontWeight: 600,
+                fontSize: "0.95rem",
+                border: "1px solid var(--color-accent)",
+                backgroundColor: "transparent",
+                flexShrink: 0,
+              }}
+            >
+              Productos
+            </Link>
+          )}
 
           {onSearchChange && (
             <div style={{ flex: 1, maxWidth: "400px", display: "flex" }}>
