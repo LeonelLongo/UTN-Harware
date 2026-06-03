@@ -17,10 +17,10 @@ export const createItem = async (req, res) => {
   const { title, model, rating, value, summary, imageUrl, available } =
     req.body;
 
-  if (!title || !model) {
+  if (!title) {
     return res
       .status(400)
-      .send({ message: "Title and model fields are required" });
+      .send({ message: "Title field is required" });
   }
 
   const newItem = await Item.create({

@@ -52,7 +52,7 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
     setCouponError(false);
   };
 
-  const total = cart.reduce((acc, p) => acc + p.price * p.quantity, 0);
+  const total = cart.reduce((acc, p) => acc + p.value * p.quantity, 0);
   const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
   const cuotaValor = couponApplied ? (total / CUOTAS).toFixed(2) : null;
 
@@ -89,7 +89,7 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
                   <tbody>
                     {cart.map((p) => (
                       <tr key={p.id} className="align-middle">
-                        <td className="ps-3 fw-semibold">{p.name}</td>
+                        <td className="ps-3 fw-semibold">{p.title}</td>
                         <td className="text-center">
                           <div className="d-flex align-items-center justify-content-center gap-2">
                             <Button
@@ -113,8 +113,8 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
                             </Button>
                           </div>
                         </td>
-                        <td className="text-end">${p.price.toLocaleString("es-AR")}</td>
-                        <td className="text-end fw-bold">${(p.price * p.quantity).toLocaleString("es-AR")}</td>
+                        <td className="text-end">${p.value.toLocaleString("es-AR")}</td>
+                        <td className="text-end fw-bold">${(p.value * p.quantity).toLocaleString("es-AR")}</td>
                         <td className="text-center">
                           <Button
                             size="sm"
@@ -147,9 +147,9 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
                 {cart.map((p) => (
                   <div key={p.id} className="d-flex justify-content-between mb-2 small">
                     <span className="text-muted">
-                      {p.name} x{p.quantity}
+                      {p.title} x{p.quantity}
                     </span>
-                    <span>${(p.price * p.quantity).toLocaleString("es-AR")}</span>
+                    <span>${(p.value * p.quantity).toLocaleString("es-AR")}</span>
                   </div>
                 ))}
                 <hr />
