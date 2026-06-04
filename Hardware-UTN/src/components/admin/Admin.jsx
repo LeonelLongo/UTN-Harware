@@ -26,7 +26,7 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
   const [search, setSearch] = useState("");
 
   const filteredProducts = products.filter((p) =>
-    p.title.toLowerCase().includes(search.toLowerCase()),
+    p.title.toLowerCase().includes(search.toLowerCase())
   );
 
   const openAdd = () => {
