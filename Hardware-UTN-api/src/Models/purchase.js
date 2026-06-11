@@ -1,0 +1,38 @@
+import { DataTypes } from "sequelize";
+import { sequelize } from "../Database/db.js";
+import { Users } from "./users.js";
+
+export const Purchase = sequelize.define(
+  "purchase",
+  {
+    purchaseId: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    product: { type: DataTypes.STRING, allowNull: false },
+    quantity: { type: DataTypes.INTEGER, allowNull: false },
+    price: { type: DataTypes.FLOAT, allowNull: false },
+    purchaseDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    status: {
+      type: DataTypes.ENUM("PENDING", "COMPLETE"),
+      allowNull: false,
+      defaultValue: "PENDING",
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: Users, key: "id" },
+    },
+  },
+  {
+    timestamps: false,
+  },
+);
+
+Users.hasMany(Purchase, { foreignKey: "userId" });
+Purchase.belongsTo(Users, { foreignKey: "userID" });
