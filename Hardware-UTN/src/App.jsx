@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 import Terminos from "./components/terminos/Terminos";
 import QuienesSomos from "./components/quienesSomos/QuienesSomos";
+import ComoComprar from "./components/comoComprar/ComoComprar";
+import Products from "./components/products/Products";
 
 import Home from "./components/home/Home";
 import Login from "./components/auth/Login/Login.jsx";
@@ -60,6 +62,21 @@ function App() {
         />
 
         <Route
+          path="/productos"
+          element={
+            <Products
+              cart={cart}
+              setCart={setCart}
+              isLoggedIn={isLoggedIn}
+              onLogout={handleLogout}
+              setShowLogin={setShowLogin}
+              isAdmin={isAdmin}
+              products={products}
+            />
+          }
+        />
+
+        <Route
           path="/producto/:id"
           element={
             <ProductDetail
@@ -89,14 +106,32 @@ function App() {
         <Route
           path="/admin"
           element={
-            isAdmin
-              ? <Admin products={products} setProducts={setProducts} isLoggedIn={isLoggedIn} onLogout={handleLogout} isAdmin={isAdmin} />
-              : <Navigate to="/" replace />
+            isAdmin ? (
+              <Admin
+                products={products}
+                setProducts={setProducts}
+                isLoggedIn={isLoggedIn}
+                onLogout={handleLogout}
+                isAdmin={isAdmin}
+              />
+            ) : (
+              <Navigate to="/" replace />
+            )
           }
         />
 
-        <Route path="/terminos" element={<Terminos setShowLogin={setShowLogin} />} />
-        <Route path="/quienes-somos" element={<QuienesSomos setShowLogin={setShowLogin} />} />
+        <Route
+          path="/como-comprar"
+          element={<ComoComprar setShowLogin={setShowLogin} />}
+        />
+        <Route
+          path="/terminos"
+          element={<Terminos setShowLogin={setShowLogin} />}
+        />
+        <Route
+          path="/quienes-somos"
+          element={<QuienesSomos setShowLogin={setShowLogin} />}
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

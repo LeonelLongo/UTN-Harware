@@ -14,13 +14,19 @@ export const findItem = async (req, res) => {
 };
 
 export const createItem = async (req, res) => {
-  const { title, model, rating, value, summary, imageUrl, available } =
-    req.body;
+  const {
+    title,
+    model,
+    rating,
+    value,
+    summary,
+    imageUrl,
+    available,
+    category,
+  } = req.body;
 
   if (!title) {
-    return res
-      .status(400)
-      .send({ message: "Title field is required" });
+    return res.status(400).send({ message: "Title field is required" });
   }
 
   const newItem = await Item.create({
@@ -31,14 +37,23 @@ export const createItem = async (req, res) => {
     summary,
     imageUrl,
     available,
+    category,
   });
   res.json(newItem);
 };
 
 export const updateItem = async (req, res) => {
   const { id } = req.params;
-  const { title, model, rating, value, summary, imageUrl, available } =
-    req.body;
+  const {
+    title,
+    model,
+    rating,
+    value,
+    summary,
+    imageUrl,
+    available,
+    category,
+  } = req.body;
   const item = await Item.findByPk(id);
 
   await item.update({
@@ -49,6 +64,7 @@ export const updateItem = async (req, res) => {
     summary,
     imageUrl,
     available,
+    category,
   });
 
   await item.save();
