@@ -1,20 +1,35 @@
 import { useState } from "react";
 import { Container } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import Footer from "./Footer";
 import LoginPrompt from "../auth/LoginPrompt";
+
+const CATEGORIES = [
+  "Periféricos",
+  "Componentes",
+  "Almacenamiento",
+  "Audio y Video",
+  "Accesorios",
+];
+
+const NAV_LINKS = [
+  { label: "Productos", to: "/productos" },
+  { label: "Ofertas", to: "/ofertas" },
+  { label: "Cómo Comprar", to: "/como-comprar" },
+];
 
 function Layout({
   children,
   cartCount = 0,
   onSearchChange = null,
+  initialSearch = "",
   isLoggedIn = false,
   isAdmin = false,
   onLogout = null,
   setShowLogin,
 }) {
   const navigate = useNavigate();
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState(initialSearch);
   const [showCartPrompt, setShowCartPrompt] = useState(false);
 
   const handleSearch = () => {
@@ -37,7 +52,10 @@ function Layout({
       {showCartPrompt && (
         <LoginPrompt
           onClose={() => setShowCartPrompt(false)}
-          onLogin={() => { setShowCartPrompt(false); setShowLogin?.(true); }}
+          onLogin={() => {
+            setShowCartPrompt(false);
+            setShowLogin?.(true);
+          }}
         />
       )}
 
@@ -102,7 +120,7 @@ function Layout({
           )}
 
           {onSearchChange && (
-            <div style={{ flex: 1, maxWidth: "400px", display: "flex" }}>
+            <div style={{ flex: 1, maxWidth: "480px", display: "flex" }}>
               <input
                 type="text"
                 value={inputValue}
@@ -160,7 +178,10 @@ function Layout({
           >
             {isLoggedIn ? (
               <button
-                onClick={() => { onLogout?.(); navigate("/"); }}
+                onClick={() => {
+                  onLogout?.();
+                  navigate("/");
+                }}
                 style={{
                   background: "none",
                   color: "white",
@@ -229,6 +250,42 @@ function Layout({
               )}
             </Link>
           </div>
+        </Container>
+      </div>
+
+      {/* Nav secundaria — fondo blanco, fuera del bloque oscuro */}
+      <div
+        style={{
+          backgroundColor: "white",
+          borderBottom: "1px solid #e5e5e5",
+          position: "sticky",
+          top: "64px",
+          zIndex: 999,
+        }}
+      >
+        <Container>
+          <nav style={{ display: "flex", justifyContent: "center" }}>
+            {NAV_LINKS.map(({ label, to }) => (
+              <NavLink
+                key={label}
+                to={to}
+                end={to === "/"}
+                style={({ isActive }) => ({
+                  color: isActive ? "var(--color-accent)" : "#444",
+                  textDecoration: "none",
+                  padding: "10px 24px",
+                  fontSize: "0.9rem",
+                  fontWeight: isActive ? 700 : 500,
+                  borderBottom: isActive
+                    ? "2px solid var(--color-accent)"
+                    : "2px solid transparent",
+                  transition: "color 0.15s",
+                })}
+              >
+                {label}
+              </NavLink>
+            ))}
+          </nav>
         </Container>
       </div>
 

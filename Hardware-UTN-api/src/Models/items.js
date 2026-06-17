@@ -10,4 +10,5 @@ export const Item = sequelize.define("item", {
   summary: { type: DataTypes.TEXT },
   imageUrl: { type: DataTypes.STRING },
   available: { type: DataTypes.BOOLEAN, defaultValue: false },
+  category: { type: DataTypes.STRING, allowNull: true },
 });

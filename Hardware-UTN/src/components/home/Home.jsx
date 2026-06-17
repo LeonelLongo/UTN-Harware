@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { Carousel } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
-import ProductList from "../products/ProductList";
-import LoginPrompt from "../auth/LoginPrompt";
 import carrusel1 from "../../assets/imagenes/carrusel/carrusel1.png";
 import carrusel2 from "../../assets/imagenes/carrusel/carrusel2.png";
 import carrusel3 from "../../assets/imagenes/carrusel/carrusel3.png";
@@ -13,55 +11,24 @@ const carouselImages = [
   { src: carrusel3, alt: "Promoción 3" },
 ];
 
-function Home({ cart, setCart, isLoggedIn, setIsLoggedIn, onLogout, setShowLogin, isAdmin, products }) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showPrompt, setShowPrompt] = useState(false);
-
-  const filteredProducts = products.filter((p) =>
-    p.title.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
-  const handleAddToCart = (product) => {
-    if (!isLoggedIn) {
-      setShowPrompt(true);
-      return;
-    }
-    const existing = cart.find((p) => p.id === product.id);
-    if (existing) {
-      setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p));
-    } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
-    }
-  };
-
-  const handleRemoveFromCart = (product) => {
-    const existing = cart.find((p) => p.id === product.id);
-    if (!existing) return;
-    if (existing.quantity === 1) {
-      setCart(cart.filter((p) => p.id !== product.id));
-    } else {
-      setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p));
-    }
-  };
-
+function Home({ cart, isLoggedIn, onLogout, setShowLogin, isAdmin }) {
+  const navigate = useNavigate();
   const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
+
+  const handleSearch = (query) => {
+    if (query.trim())
+      navigate(`/productos?q=${encodeURIComponent(query.trim())}`);
+  };
 
   return (
     <Layout
       cartCount={cartCount}
-      onSearchChange={setSearchQuery}
+      onSearchChange={handleSearch}
       isLoggedIn={isLoggedIn}
       onLogout={onLogout}
       setShowLogin={setShowLogin}
       isAdmin={isAdmin}
     >
-      {showPrompt && (
-        <LoginPrompt
-          onClose={() => setShowPrompt(false)}
-          onLogin={() => { setShowPrompt(false); setShowLogin(true); }}
-        />
-      )}
-
       <Carousel
         controls={false}
         interval={5000}
@@ -80,12 +47,65 @@ function Home({ cart, setCart, isLoggedIn, setIsLoggedIn, onLogout, setShowLogin
         ))}
       </Carousel>
 
-      <ProductList
-        products={filteredProducts}
-        onAdd={handleAddToCart}
-        onRemove={handleRemoveFromCart}
-        cart={cart}
-      />
+      {/* Sección Novedades */}
+      <section style={{ marginBottom: "40px" }}>
+        <h4
+          style={{
+            fontWeight: 700,
+            marginBottom: "16px",
+            borderLeft: "4px solid var(--color-accent)",
+            paddingLeft: "12px",
+          }}
+        >
+          Novedades
+        </h4>
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            minHeight: "180px",
+            backgroundColor: "#f8f8f8",
+            borderRadius: "var(--border-radius)",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#bbb",
+            fontSize: "0.95rem",
+            border: "1px dashed #ddd",
+          }}
+        >
+          Próximamente
+        </div>
+      </section>
+
+      {/* Sección Ofertas */}
+      <section style={{ marginBottom: "24px" }}>
+        <h4
+          style={{
+            fontWeight: 700,
+            marginBottom: "16px",
+            borderLeft: "4px solid var(--color-accent)",
+            paddingLeft: "12px",
+          }}
+        >
+          Ofertas
+        </h4>
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            minHeight: "180px",
+            backgroundColor: "#f8f8f8",
+            borderRadius: "var(--border-radius)",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#bbb",
+            fontSize: "0.95rem",
+            border: "1px dashed #ddd",
+          }}
+        >
+          Próximamente
+        </div>
+      </section>
     </Layout>
   );
 }

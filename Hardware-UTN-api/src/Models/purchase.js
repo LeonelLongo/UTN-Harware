@@ -23,11 +23,6 @@ export const Purchase = sequelize.define(
       allowNull: false,
       defaultValue: "PENDING",
     },
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: { model: Users, key: "id" },
-    },
   },
   {
     timestamps: false,
@@ -35,4 +30,4 @@ export const Purchase = sequelize.define(
 );
 
 Users.hasMany(Purchase, { foreignKey: "userId" });
-Purchase.belongsTo(Users, { foreignKey: "userID" });
+Purchase.belongsTo(Users, { foreignKey: "userId" });
