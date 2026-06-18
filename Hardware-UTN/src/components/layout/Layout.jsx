@@ -20,7 +20,7 @@ const NAV_LINKS = [
 ];
 
 function Layout({ children, onSearchChange = null, initialSearch = "" }) {
-  const { isLoggedIn, isAdmin, handleLogout, setShowLogin, cart } = useAppContext();
+  const { isLoggedIn, isAdmin, isSuperAdmin, handleLogout, setShowLogin, cart } = useAppContext();
   const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState(initialSearch);
@@ -94,7 +94,7 @@ function Layout({ children, onSearchChange = null, initialSearch = "" }) {
             </span>
           </Link>
 
-          {isAdmin && (
+          {(isAdmin || isSuperAdmin) && (
             <Link
               to="/admin"
               style={{
@@ -109,7 +109,7 @@ function Layout({ children, onSearchChange = null, initialSearch = "" }) {
                 flexShrink: 0,
               }}
             >
-              Productos
+              ADMIN
             </Link>
           )}
 

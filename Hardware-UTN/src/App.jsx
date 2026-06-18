@@ -9,7 +9,7 @@ import Home from "./components/home/Home";
 import Login from "./components/auth/Login/Login.jsx";
 import Register from "./components/auth/Register.jsx";
 import Cart from "./components/cart/Cart.jsx";
-import Admin from "./components/admin/Admin";
+import AdminPanel from "./components/admin/AdminPanel";
 import Protected from "./components/auth/Protected";
 import NotFound from "./components/notFound/NotFound";
 import ProductDetail from "./components/products/ProductDetail";
@@ -70,7 +70,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            isAdmin || isSuperAdmin ? <Admin /> : <Navigate to="/" replace />
+            isAdmin || isSuperAdmin ? <AdminPanel /> : <Navigate to="/" replace />
           }
         />
         <Route path="/como-comprar" element={<ComoComprar />} />
