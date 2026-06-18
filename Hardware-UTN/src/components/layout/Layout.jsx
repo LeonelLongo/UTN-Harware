@@ -3,6 +3,7 @@ import { Container } from "react-bootstrap";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import Footer from "./Footer";
 import LoginPrompt from "../auth/LoginPrompt";
+import { useAppContext } from "../../context/AppContext";
 
 const CATEGORIES = [
   "Periféricos",
@@ -18,16 +19,9 @@ const NAV_LINKS = [
   { label: "Cómo Comprar", to: "/como-comprar" },
 ];
 
-function Layout({
-  children,
-  cartCount = 0,
-  onSearchChange = null,
-  initialSearch = "",
-  isLoggedIn = false,
-  isAdmin = false,
-  onLogout = null,
-  setShowLogin,
-}) {
+function Layout({ children, onSearchChange = null, initialSearch = "" }) {
+  const { isLoggedIn, isAdmin, handleLogout, setShowLogin, cart } = useAppContext();
+  const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState(initialSearch);
   const [showCartPrompt, setShowCartPrompt] = useState(false);
@@ -179,7 +173,7 @@ function Layout({
             {isLoggedIn ? (
               <button
                 onClick={() => {
-                  onLogout?.();
+                  handleLogout();
                   navigate("/");
                 }}
                 style={{

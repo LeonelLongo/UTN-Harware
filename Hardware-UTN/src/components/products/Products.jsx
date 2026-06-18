@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import Layout from "../layout/Layout";
 import ProductList from "./ProductList";
 import LoginPrompt from "../auth/LoginPrompt";
+import { useAppContext } from "../../context/AppContext";
 
 const CATEGORIES = [
   "Periféricos",
@@ -12,15 +13,8 @@ const CATEGORIES = [
   "Accesorios",
 ];
 
-function Products({
-  cart,
-  setCart,
-  isLoggedIn,
-  onLogout,
-  setShowLogin,
-  isAdmin,
-  products,
-}) {
+function Products() {
+  const { cart, setCart, isLoggedIn, setShowLogin, products } = useAppContext();
   const [searchParams] = useSearchParams();
   const initialQ = searchParams.get("q") || "";
   const [searchQuery, setSearchQuery] = useState(initialQ);
@@ -67,18 +61,8 @@ function Products({
     }
   };
 
-  const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
-
   return (
-    <Layout
-      cartCount={cartCount}
-      onSearchChange={setSearchQuery}
-      initialSearch={initialQ}
-      isLoggedIn={isLoggedIn}
-      onLogout={onLogout}
-      setShowLogin={setShowLogin}
-      isAdmin={isAdmin}
-    >
+    <Layout onSearchChange={setSearchQuery} initialSearch={initialQ}>
       {showPrompt && (
         <LoginPrompt
           onClose={() => setShowPrompt(false)}

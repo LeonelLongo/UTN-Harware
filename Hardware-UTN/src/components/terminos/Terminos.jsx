@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import Layout from "../layout/Layout";
 
-function Terminos({ setShowLogin }) {
+function Terminos() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   return (
-    <Layout setShowLogin={setShowLogin}>
+    <Layout>
       <div
         style={{ maxWidth: "800px", margin: "0 auto", padding: "40px 16px" }}
       >

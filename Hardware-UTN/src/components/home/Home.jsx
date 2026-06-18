@@ -11,9 +11,8 @@ const carouselImages = [
   { src: carrusel3, alt: "Promoción 3" },
 ];
 
-function Home({ cart, isLoggedIn, onLogout, setShowLogin, isAdmin }) {
+function Home() {
   const navigate = useNavigate();
-  const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
 
   const handleSearch = (query) => {
     if (query.trim())
@@ -21,14 +20,7 @@ function Home({ cart, isLoggedIn, onLogout, setShowLogin, isAdmin }) {
   };
 
   return (
-    <Layout
-      cartCount={cartCount}
-      onSearchChange={handleSearch}
-      isLoggedIn={isLoggedIn}
-      onLogout={onLogout}
-      setShowLogin={setShowLogin}
-      isAdmin={isAdmin}
-    >
+    <Layout onSearchChange={handleSearch}>
       <Carousel
         controls={false}
         interval={5000}

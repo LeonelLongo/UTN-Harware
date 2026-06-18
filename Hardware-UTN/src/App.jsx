@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
+import { useAppContext } from "./context/AppContext";
 import Terminos from "./components/terminos/Terminos";
 import QuienesSomos from "./components/quienesSomos/QuienesSomos";
 import ComoComprar from "./components/comoComprar/ComoComprar";
 import Products from "./components/products/Products";
-
 import Home from "./components/home/Home";
 import Login from "./components/auth/Login/Login.jsx";
 import Register from "./components/auth/Register.jsx";
@@ -16,28 +15,19 @@ import NotFound from "./components/notFound/NotFound";
 import ProductDetail from "./components/products/ProductDetail";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [cart, setCart] = useState([]);
-  const [showLogin, setShowLogin] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
-  const [registerEmail, setRegisterEmail] = useState("");
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    fetch("http://localhost:3000/items")
-      .then((res) => res.json())
-      .then((data) => setProducts(data))
-      .catch((err) => console.log(err));
-  }, []);
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setIsAdmin(false);
-    setIsSuperAdmin(false);
-    setCart([]);
-  };
+  const {
+    isAdmin,
+    isSuperAdmin,
+    showLogin,
+    setShowLogin,
+    showRegister,
+    setShowRegister,
+    registerEmail,
+    setRegisterEmail,
+    setIsLoggedIn,
+    setIsAdmin,
+    setIsSuperAdmin,
+  } = useAppContext();
 
   return (
     <BrowserRouter>
@@ -47,106 +37,45 @@ function App() {
           setIsAdmin={setIsAdmin}
           setIsSuperAdmin={setIsSuperAdmin}
           onClose={() => setShowLogin(false)}
-          onSwitchToRegister={(email = "") => { setRegisterEmail(email); setShowLogin(false); setShowRegister(true); }}
+          onSwitchToRegister={(email = "") => {
+            setRegisterEmail(email);
+            setShowLogin(false);
+            setShowRegister(true);
+          }}
         />
       )}
       {showRegister && (
         <Register
           onClose={() => setShowRegister(false)}
-          onSwitchToLogin={() => { setShowRegister(false); setShowLogin(true); }}
+          onSwitchToLogin={() => {
+            setShowRegister(false);
+            setShowLogin(true);
+          }}
           initialEmail={registerEmail}
         />
       )}
 
       <Routes>
-        <Route
-          path="/"
-          element={
-            <Home
-              cart={cart}
-              setCart={setCart}
-              isLoggedIn={isLoggedIn}
-              setIsLoggedIn={setIsLoggedIn}
-              onLogout={handleLogout}
-              setShowLogin={setShowLogin}
-              isAdmin={isAdmin}
-              products={products}
-            />
-          }
-        />
-
-        <Route
-          path="/productos"
-          element={
-            <Products
-              cart={cart}
-              setCart={setCart}
-              isLoggedIn={isLoggedIn}
-              onLogout={handleLogout}
-              setShowLogin={setShowLogin}
-              isAdmin={isAdmin}
-              products={products}
-            />
-          }
-        />
-
-        <Route
-          path="/producto/:id"
-          element={
-            <ProductDetail
-              cart={cart}
-              setCart={setCart}
-              isLoggedIn={isLoggedIn}
-              setIsLoggedIn={setIsLoggedIn}
-              setShowLogin={setShowLogin}
-            />
-          }
-        />
-
+        <Route path="/" element={<Home />} />
+        <Route path="/productos" element={<Products />} />
+        <Route path="/producto/:id" element={<ProductDetail />} />
         <Route
           path="/cart"
           element={
-            <Protected isSignedIn={isLoggedIn} setShowLogin={setShowLogin}>
-              <Cart
-                cart={cart}
-                setCart={setCart}
-                isLoggedIn={isLoggedIn}
-                setIsLoggedIn={setIsLoggedIn}
-              />
+            <Protected>
+              <Cart />
             </Protected>
           }
         />
-
         <Route
           path="/admin"
           element={
-            isAdmin || isSuperAdmin ? (
-              <Admin
-                products={products}
-                setProducts={setProducts}
-                isLoggedIn={isLoggedIn}
-                onLogout={handleLogout}
-                isAdmin={isAdmin}
-                isSuperAdmin={isSuperAdmin}
-              />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            isAdmin || isSuperAdmin ? <Admin /> : <Navigate to="/" replace />
           }
         />
-
-        <Route
-          path="/como-comprar"
-          element={<ComoComprar setShowLogin={setShowLogin} />}
-        />
-        <Route
-          path="/terminos"
-          element={<Terminos setShowLogin={setShowLogin} />}
-        />
-        <Route
-          path="/quienes-somos"
-          element={<QuienesSomos setShowLogin={setShowLogin} />}
-        />
+        <Route path="/como-comprar" element={<ComoComprar />} />
+        <Route path="/terminos" element={<Terminos />} />
+        <Route path="/quienes-somos" element={<QuienesSomos />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

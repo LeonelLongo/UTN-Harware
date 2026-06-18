@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Table, Button, Modal, Form, Badge } from "react-bootstrap";
 import Layout from "../layout/Layout";
+import { useAppContext } from "../../context/AppContext";
 
 const CATEGORIES = [
   "Periféricos",
@@ -18,7 +19,8 @@ const emptyForm = {
   category: "",
 };
 
-function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
+function Admin() {
+  const { products, setProducts } = useAppContext();
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -90,7 +92,7 @@ function Admin({ products, setProducts, isLoggedIn, onLogout, isAdmin }) {
   };
 
   return (
-    <Layout isLoggedIn={isLoggedIn} isAdmin={isAdmin} onLogout={onLogout}>
+    <Layout>
       <div className="d-flex justify-content-between align-items-center mb-4 gap-3">
         <h4 className="fw-bold mb-0 flex-shrink-0">Panel de administración</h4>
         <Form.Control

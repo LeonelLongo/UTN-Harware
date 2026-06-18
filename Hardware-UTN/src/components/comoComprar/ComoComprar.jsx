@@ -33,9 +33,9 @@ const PASOS = [
   },
 ];
 
-function ComoComprar({ setShowLogin }) {
+function ComoComprar() {
   return (
-    <Layout setShowLogin={setShowLogin}>
+    <Layout>
       <div
         style={{ maxWidth: "720px", margin: "0 auto", padding: "8px 0 40px" }}
       >

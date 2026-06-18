@@ -2,11 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Row, Col, Table, Button, Card, Badge, Form, InputGroup } from "react-bootstrap";
 import Layout from "../layout/Layout";
+import { useAppContext } from "../../context/AppContext";
 
 const CUPON_VALIDO = "TUP2026";
 const CUOTAS = 6;
 
-function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
+function Cart() {
+  const { cart, setCart, handleLogout } = useAppContext();
   const [couponInput, setCouponInput] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponError, setCouponError] = useState(false);
@@ -57,11 +59,7 @@ function Cart({ cart, setCart, isLoggedIn, setIsLoggedIn }) {
   const cuotaValor = couponApplied ? (total / CUOTAS).toFixed(2) : null;
 
   return (
-    <Layout
-      cartCount={cartCount}
-      isLoggedIn={isLoggedIn}
-      onLogout={() => { setIsLoggedIn(false); navigate("/"); }}
-    >
+    <Layout>
       <h4 className="mb-4 fw-bold">Carrito de compras</h4>
 
       {cart.length === 0 ? (
