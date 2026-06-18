@@ -23,6 +23,7 @@ export const createItem = async (req, res) => {
     imageUrl,
     available,
     category,
+    stock,
   } = req.body;
 
   if (!title) {
@@ -38,6 +39,7 @@ export const createItem = async (req, res) => {
     imageUrl,
     available,
     category,
+    stock,
   });
   res.json(newItem);
 };
@@ -53,6 +55,7 @@ export const updateItem = async (req, res) => {
     imageUrl,
     available,
     category,
+    stock,
   } = req.body;
   const item = await Item.findByPk(id);
 
@@ -65,6 +68,7 @@ export const updateItem = async (req, res) => {
     imageUrl,
     available,
     category,
+    stock,
   });
 
   await item.save();

@@ -8,6 +8,7 @@ import Products from "./components/products/Products";
 
 import Home from "./components/home/Home";
 import Login from "./components/auth/Login/Login.jsx";
+import Register from "./components/auth/Register.jsx";
 import Cart from "./components/cart/Cart.jsx";
 import Admin from "./components/admin/Admin";
 import Protected from "./components/auth/Protected";
@@ -17,8 +18,11 @@ import ProductDetail from "./components/products/ProductDetail";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [cart, setCart] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [registerEmail, setRegisterEmail] = useState("");
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -31,6 +35,7 @@ function App() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setIsAdmin(false);
+    setIsSuperAdmin(false);
     setCart([]);
   };
 
@@ -40,7 +45,16 @@ function App() {
         <Login
           setIsLoggedIn={setIsLoggedIn}
           setIsAdmin={setIsAdmin}
+          setIsSuperAdmin={setIsSuperAdmin}
           onClose={() => setShowLogin(false)}
+          onSwitchToRegister={(email = "") => { setRegisterEmail(email); setShowLogin(false); setShowRegister(true); }}
+        />
+      )}
+      {showRegister && (
+        <Register
+          onClose={() => setShowRegister(false)}
+          onSwitchToLogin={() => { setShowRegister(false); setShowLogin(true); }}
+          initialEmail={registerEmail}
         />
       )}
 
@@ -106,13 +120,14 @@ function App() {
         <Route
           path="/admin"
           element={
-            isAdmin ? (
+            isAdmin || isSuperAdmin ? (
               <Admin
                 products={products}
                 setProducts={setProducts}
                 isLoggedIn={isLoggedIn}
                 onLogout={handleLogout}
                 isAdmin={isAdmin}
+                isSuperAdmin={isSuperAdmin}
               />
             ) : (
               <Navigate to="/" replace />

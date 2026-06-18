@@ -209,7 +209,7 @@ function Layout({
                   cursor: "pointer",
                 }}
               >
-                Iniciar sesión
+                Ingresa
               </button>
             )}
 

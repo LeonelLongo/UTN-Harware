@@ -22,8 +22,8 @@ try {
   app.use(itemRoutes);
   app.use(userRoutes);
   app.use(purchaseRoutes);
-  await sequelize.sync({ alter: true });
+  await sequelize.sync();
   console.log(`Server listening in port ${PORT}`);
 } catch (error) {
-  console.log(`There was an error on initialization`);
+  console.error(`Error on initialization:`, error);
 }

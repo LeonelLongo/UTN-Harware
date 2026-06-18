@@ -1,38 +1,67 @@
 import { useState } from "react";
 import { Button, Card, Form, FormGroup } from "react-bootstrap";
 
-const ADMIN_EMAIL = "adminutn@gmail.com";
-const ADMIN_PASSWORD = "admin123";
-
-const Login = ({ setIsLoggedIn, setIsAdmin, onClose }) => {
+const Login = ({ setIsLoggedIn, setIsAdmin, setIsSuperAdmin, onClose, onSwitchToRegister }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: false, password: false });
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState({ type: null, message: "" });
+
+  const clearLoginError = () => setLoginError({ type: null, message: "" });
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
     setErrors({ ...errors, email: false });
+    clearLoginError();
   };
 
   const handlePasswordChange = (event) => {
     setPassword(event.target.value);
     setErrors({ ...errors, password: false });
+    clearLoginError();
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const newErrors = {
       email: email.trim() === "",
       password: password.length < 7,
     };
     setErrors(newErrors);
-    if (!newErrors.email && !newErrors.password) {
-      setIsLoggedIn(true);
-      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        setIsAdmin(true);
+    if (newErrors.email || newErrors.password) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:3000/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mailAdress: email, password }),
+      });
+
+      if (res.status === 404) {
+        setLoginError({ type: "notFound", message: "Este email no está registrado." });
+        return;
       }
+      if (res.status === 401) {
+        setLoginError({ type: "wrongPassword", message: "Contraseña incorrecta." });
+        return;
+      }
+      if (!res.ok) {
+        setLoginError({ type: "error", message: "Error al iniciar sesión. Intentá de nuevo." });
+        return;
+      }
+
+      const userData = await res.json();
+      setIsLoggedIn(true);
+      if (userData.admin) setIsAdmin(true);
+      if (userData.superAdmin) setIsSuperAdmin(true);
       onClose();
+    } catch {
+      setLoginError({ type: "error", message: "No se pudo conectar con el servidor." });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -75,6 +104,29 @@ const Login = ({ setIsLoggedIn, setIsAdmin, onClose }) => {
             <p className="text-muted small mb-4">
               Ingresá tus credenciales para continuar
             </p>
+
+            {loginError.type === "notFound" && (
+              <div className="alert alert-warning py-2 small mb-3 d-flex align-items-center justify-content-between gap-2">
+                <span>{loginError.message}</span>
+                <button
+                  type="button"
+                  onClick={() => onSwitchToRegister?.(email)}
+                  style={{ background: "none", border: "none", padding: 0, fontWeight: 600, color: "var(--color-accent)", cursor: "pointer", whiteSpace: "nowrap" }}
+                >
+                  Registrarme →
+                </button>
+              </div>
+            )}
+            {loginError.type === "wrongPassword" && (
+              <div className="alert alert-danger py-2 small mb-3">
+                {loginError.message}
+              </div>
+            )}
+            {loginError.type === "error" && (
+              <div className="alert alert-danger py-2 small mb-3">
+                {loginError.message}
+              </div>
+            )}
 
             <Form onSubmit={handleSubmit}>
               <FormGroup className="mb-3">
@@ -142,20 +194,21 @@ const Login = ({ setIsLoggedIn, setIsAdmin, onClose }) => {
                 <Button
                   type="submit"
                   size="lg"
+                  disabled={loading}
                   style={{
                     backgroundColor: "var(--color-accent)",
                     border: "none",
                   }}
                 >
-                  Ingresar
+                  {loading ? "Verificando..." : "Ingresar"}
                 </Button>
                 <Button
                   type="button"
                   size="lg"
                   variant="outline-secondary"
-                  onClick={onClose}
+                  onClick={() => onSwitchToRegister?.()}
                 >
-                  Cancelar
+                  Registrarme
                 </Button>
               </div>
             </Form>
