@@ -6,7 +6,12 @@ import { FaXTwitter } from "react-icons/fa6";
 function Footer() {
   return (
     <footer
-      style={{ backgroundColor: "#1c1c1c", color: "white", padding: "40px 0" }}
+      style={{
+        backgroundColor: "#1c1c1c",
+        color: "white",
+        padding: "40px 0 20px 0",
+        borderTop: "3px solid var(--color-accent)",
+      }}
     >
       <Container>
         <div
@@ -122,6 +127,19 @@ function Footer() {
           </div>
         </div>
       </Container>
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: "32px",
+          paddingTop: "20px",
+          borderTop: "1px solid rgba(255,255,255,0.1)",
+          fontSize: "0.8rem",
+          color: "rgba(255,255,255,0.4)",
+        }}
+      >
+        © {new Date().getFullYear()} Hardware UTN. Todos los derechos
+        reservados.
+      </div>
     </footer>
   );
 }
