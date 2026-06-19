@@ -6,15 +6,22 @@ function ProductItem({ id, name, price, image, onAdd, onRemove, quantityInCart =
 
   return (
     <Card
-      className="h-100 shadow-sm border-0"
+      className="h-100 product-card"
       style={{ cursor: "pointer" }}
       onClick={() => navigate(`/producto/${id}`)}
     >
       {image && (
-        <div style={{ backgroundColor: "#f8f8f8", padding: "16px", textAlign: "center" }}>
+        <div
+          style={{
+            backgroundColor: "#f8f8f8",
+            padding: "16px",
+            textAlign: "center",
+          }}
+        >
           <img
             src={image}
             alt={name}
+            className="product-img"
             style={{ height: "160px", objectFit: "contain", maxWidth: "100%" }}
           />
         </div>
@@ -39,14 +46,26 @@ function ProductItem({ id, name, price, image, onAdd, onRemove, quantityInCart =
           >
             <Button
               variant="outline-secondary"
-              style={{ width: "36px", height: "36px", padding: 0, lineHeight: 1 }}
+              style={{
+                width: "36px",
+                height: "36px",
+                padding: 0,
+                lineHeight: 1,
+              }}
               onClick={() => onRemove()}
             >
               −
             </Button>
             <span className="fw-semibold">{quantityInCart} en carrito</span>
             <Button
-              style={{ width: "36px", height: "36px", padding: 0, lineHeight: 1, backgroundColor: "var(--color-accent)", border: "none" }}
+              style={{
+                width: "36px",
+                height: "36px",
+                padding: 0,
+                lineHeight: 1,
+                backgroundColor: "var(--color-accent)",
+                border: "none",
+              }}
               onClick={() => onAdd()}
             >
               +
@@ -56,7 +75,10 @@ function ProductItem({ id, name, price, image, onAdd, onRemove, quantityInCart =
           <Button
             className="mt-3 w-100 fw-semibold"
             style={{ backgroundColor: "var(--color-accent)", border: "none" }}
-            onClick={(e) => { e.stopPropagation(); onAdd(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAdd();
+            }}
           >
             Agregar al carrito
           </Button>
