@@ -6,7 +6,6 @@ const CATEGORIES = [
   "Periféricos",
   "Componentes",
   "Almacenamiento",
-  "Audio y Video",
   "Accesorios",
 ];
 

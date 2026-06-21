@@ -27,6 +27,7 @@ function App() {
     setIsLoggedIn,
     setIsAdmin,
     setIsSuperAdmin,
+    setCurrentUser,
   } = useAppContext();
 
   return (
@@ -36,6 +37,7 @@ function App() {
           setIsLoggedIn={setIsLoggedIn}
           setIsAdmin={setIsAdmin}
           setIsSuperAdmin={setIsSuperAdmin}
+          setCurrentUser={setCurrentUser}
           onClose={() => setShowLogin(false)}
           onSwitchToRegister={(email = "") => {
             setRegisterEmail(email);

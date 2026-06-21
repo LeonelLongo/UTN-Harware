@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Row, Col, Table, Button, Card, Badge, Form, InputGroup } from "react-bootstrap";
+import { Row, Col, Table, Button, Card, Badge, Form, InputGroup, Modal } from "react-bootstrap";
 import Layout from "../layout/Layout";
 import { useAppContext } from "../../context/AppContext";
 
@@ -8,10 +8,15 @@ const CUPON_VALIDO = "TUP2026";
 const CUOTAS = 6;
 
 function Cart() {
-  const { cart, setCart, handleLogout } = useAppContext();
+  const { cart, setCart, currentUser } = useAppContext();
   const [couponInput, setCouponInput] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponError, setCouponError] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [receiptItems, setReceiptItems] = useState([]);
+  const [receiptTotal, setReceiptTotal] = useState(0);
+  const [receiptNumber, setReceiptNumber] = useState("");
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleRemove = (id) => {
@@ -57,6 +62,35 @@ function Cart() {
   const total = cart.reduce((acc, p) => acc + p.value * p.quantity, 0);
   const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
   const cuotaValor = couponApplied ? (total / CUOTAS).toFixed(2) : null;
+
+  const handleCheckout = async () => {
+    setCheckoutLoading(true);
+    try {
+      await Promise.all(
+        cart.map((item) =>
+          fetch("http://localhost:3000/purchases", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: currentUser?.userId,
+              product: item.title,
+              quantity: item.quantity,
+              price: item.value * item.quantity,
+            }),
+          })
+        )
+      );
+      setReceiptItems([...cart]);
+      setReceiptTotal(total);
+      setReceiptNumber(`${new Date().toLocaleDateString("es-AR").replace(/\//g, "")}-${Date.now().toString().slice(-4)}`);
+      handleClear();
+      setShowReceipt(true);
+    } catch {
+      alert("Error al procesar la compra. Intentá de nuevo.");
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
 
   return (
     <Layout>
@@ -207,9 +241,10 @@ function Cart() {
                 <Button
                   size="lg"
                   style={{ backgroundColor: "var(--color-accent)", border: "none" }}
-                  onClick={() => { alert("¡Compra finalizada! Muchas gracias por su compra."); handleClear(); }}
+                  onClick={handleCheckout}
+                  disabled={checkoutLoading}
                 >
-                  Finalizar compra
+                  {checkoutLoading ? "Procesando..." : "Finalizar compra"}
                 </Button>
               </Card.Footer>
             </Card>
@@ -220,6 +255,61 @@ function Cart() {
       <Link to="/" className="text-decoration-none small d-inline-block mt-3" style={{ color: "var(--color-accent)" }}>
         ← Seguir comprando
       </Link>
+
+      <Modal show={showReceipt} onHide={() => { setShowReceipt(false); navigate("/"); }} centered size="lg">
+        <Modal.Header style={{ backgroundColor: "var(--color-header)", color: "white" }}>
+          <Modal.Title className="fw-bold">¡Gracias por tu compra!</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="p-4">
+          <div className="text-center mb-4">
+            <div style={{ fontSize: "2.5rem" }}>✅</div>
+            <h5 className="fw-bold mt-2">Tu pedido fue registrado con éxito</h5>
+            <p className="text-muted small mb-0">Recibo N° <strong>{receiptNumber}</strong></p>
+            <p className="text-muted small">{new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" })}</p>
+          </div>
+
+          <Table bordered size="sm" className="mb-3">
+            <thead style={{ backgroundColor: "var(--color-header)", color: "white" }}>
+              <tr>
+                <th>Producto</th>
+                <th className="text-center">Cant.</th>
+                <th className="text-end">Precio unit.</th>
+                <th className="text-end">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {receiptItems.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.title}</td>
+                  <td className="text-center">{item.quantity}</td>
+                  <td className="text-end">${item.value.toLocaleString("es-AR")}</td>
+                  <td className="text-end fw-semibold">${(item.value * item.quantity).toLocaleString("es-AR")}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={3} className="text-end fw-bold">TOTAL</td>
+                <td className="text-end fw-bold fs-5" style={{ color: "var(--color-accent)" }}>
+                  ${receiptTotal.toLocaleString("es-AR")}
+                </td>
+              </tr>
+            </tfoot>
+          </Table>
+
+          <p className="text-muted small text-center mb-0">
+            Podés hacer seguimiento de tu pedido desde tu cuenta. El estado inicial es <strong>PENDIENTE</strong>.
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            style={{ backgroundColor: "var(--color-accent)", border: "none" }}
+            onClick={() => { setShowReceipt(false); navigate("/"); }}
+          >
+            Volver al inicio
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Layout>
   );
 }
