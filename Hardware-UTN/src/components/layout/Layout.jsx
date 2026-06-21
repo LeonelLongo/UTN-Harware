@@ -11,13 +11,11 @@ const CATEGORIES = [
   "Periféricos",
   "Componentes",
   "Almacenamiento",
-  "Audio y Video",
   "Accesorios",
 ];
 
 const NAV_LINKS = [
   { label: "Productos", to: "/productos" },
-  { label: "Ofertas", to: "/ofertas" },
   { label: "Cómo Comprar", to: "/como-comprar" },
 ];
 

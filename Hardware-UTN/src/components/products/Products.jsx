@@ -9,7 +9,6 @@ const CATEGORIES = [
   "Periféricos",
   "Componentes",
   "Almacenamiento",
-  "Audio y Video",
   "Accesorios",
 ];
 
@@ -29,6 +28,8 @@ function Products() {
       selectedCategory === "Todas" || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const ofertaIds = new Set(products.filter((p) => p.isOffer).map((p) => p.id));
 
   const handleAddToCart = (product) => {
     if (!isLoggedIn) {
@@ -121,6 +122,7 @@ function Products() {
             onAdd={handleAddToCart}
             onRemove={handleRemoveFromCart}
             cart={cart}
+            ofertaIds={ofertaIds}
           />
         </div>
       </div>

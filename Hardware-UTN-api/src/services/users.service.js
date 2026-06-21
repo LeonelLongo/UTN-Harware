@@ -15,7 +15,7 @@ export const findUsers = async (req, res) => {
 };
 
 export const createUsers = async (req, res) => {
-  const { firstName, lastName, userName, mailAdress, password } = req.body;
+  const { firstName, lastName, userName, mailAdress, password, rol } = req.body;
   if (!firstName || !lastName || !userName || !mailAdress || !password)
     return res.status(400).json({ message: "Todos los campos son requeridos" });
   const user = await Users.create({
@@ -24,6 +24,7 @@ export const createUsers = async (req, res) => {
     userName,
     mailAdress,
     password,
+    ...(rol && { rol }),
   });
   res.status(201).json(user);
 };

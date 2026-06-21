@@ -12,7 +12,9 @@ export const Item = sequelize.define(
     summary: { type: DataTypes.TEXT },
     imageUrl: { type: DataTypes.STRING },
     available: { type: DataTypes.BOOLEAN, defaultValue: false },
-    category: { type: DataTypes.STRING, allowNull: true },
+    category: { type: DataTypes.ENUM('Periféricos', 'Accesorios', 'Componentes'), allowNull: false },
+    subCategory: {type: DataTypes.STRING, allowNull: true},
+    isOffer: {type: DataTypes.BOOLEAN, defaultValue: false}
   },
   {
     timestamps: false,

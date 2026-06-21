@@ -1,7 +1,7 @@
 import { Row, Col } from "react-bootstrap";
 import ProductItem from "./ProductItem";
 
-function ProductList({ products, onAdd, onRemove, cart = [] }) {
+function ProductList({ products, onAdd, onRemove, cart = [], ofertaIds = new Set() }) {
   const getQty = (id) => cart.find((p) => p.id === id)?.quantity ?? 0;
 
   if (products.length === 0) {
@@ -22,6 +22,7 @@ function ProductList({ products, onAdd, onRemove, cart = [] }) {
             onAdd={() => onAdd(product)}
             onRemove={() => onRemove(product)}
             quantityInCart={getQty(product.id)}
+            discount={ofertaIds.has(product.id) ? 20 : 0}
           />
         </Col>
       ))}

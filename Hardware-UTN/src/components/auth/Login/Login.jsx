@@ -55,8 +55,8 @@ const Login = ({ setIsLoggedIn, setIsAdmin, setIsSuperAdmin, onClose, onSwitchTo
 
       const userData = await res.json();
       setIsLoggedIn(true);
-      if (userData.admin) setIsAdmin(true);
-      if (userData.superAdmin) setIsSuperAdmin(true);
+      if (userData.rol === "admin") setIsAdmin(true);
+      if (userData.rol === "superAdmin") setIsSuperAdmin(true);
       onClose();
     } catch {
       setLoginError({ type: "error", message: "No se pudo conectar con el servidor." });
