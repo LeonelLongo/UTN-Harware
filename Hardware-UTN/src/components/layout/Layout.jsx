@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Container } from "react-bootstrap";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import Footer from "./Footer";
 import LoginPrompt from "../auth/LoginPrompt";
+import UserMenu from "./UserMenu";
 import { useAppContext } from "../../context/AppContext";
 import { FiUser, FiShoppingCart } from "react-icons/fi";
 
@@ -20,9 +21,8 @@ const NAV_LINKS = [
 ];
 
 function Layout({ children, onSearchChange = null, initialSearch = "" }) {
-  const { isLoggedIn, isAdmin, isSuperAdmin, handleLogout, setShowLogin, cart } = useAppContext();
+  const { isLoggedIn, isAdmin, isSuperAdmin, setShowLogin, cart } = useAppContext();
   const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
-  const navigate = useNavigate();
   const [inputValue, setInputValue] = useState(initialSearch);
   const [showCartPrompt, setShowCartPrompt] = useState(false);
 
@@ -176,24 +176,7 @@ function Layout({ children, onSearchChange = null, initialSearch = "" }) {
             }}
           >
             {isLoggedIn ? (
-              <button
-                onClick={() => {
-                  handleLogout();
-                  navigate("/");
-                }}
-                style={{
-                  background: "none",
-                  color: "white",
-                  padding: "8px 16px",
-                  borderRadius: "var(--border-radius)",
-                  fontWeight: 600,
-                  fontSize: "0.95rem",
-                  border: "1px solid white",
-                  cursor: "pointer",
-                }}
-              >
-                Cerrar sesión
-              </button>
+              <UserMenu />
             ) : (
               <button
                 onClick={() => setShowLogin?.(true)}
@@ -218,34 +201,37 @@ function Layout({ children, onSearchChange = null, initialSearch = "" }) {
             <Link
               to="/cart"
               onClick={handleCartClick}
+              title="Carrito"
               style={{
+                position: "relative",
                 display: "flex",
                 alignItems: "center",
-                gap: "8px",
+                justifyContent: "center",
                 textDecoration: "none",
-                backgroundColor: "var(--color-accent)",
                 color: "white",
-                padding: "8px 16px",
-                borderRadius: "var(--border-radius)",
-                fontWeight: 600,
-                fontSize: "0.95rem",
+                width: "38px",
+                height: "38px",
+                flexShrink: 0,
               }}
             >
-              <FiShoppingCart />
-              Carrito
+              <FiShoppingCart size={20} />
               {cartCount > 0 && (
                 <span
                   style={{
+                    position: "absolute",
+                    top: "-6px",
+                    right: "-6px",
                     backgroundColor: "white",
                     color: "var(--color-accent)",
                     borderRadius: "50%",
-                    width: "22px",
-                    height: "22px",
+                    width: "20px",
+                    height: "20px",
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "0.75rem",
+                    fontSize: "0.7rem",
                     fontWeight: 700,
+                    border: "1px solid var(--color-accent)",
                   }}
                 >
                   {cartCount}
