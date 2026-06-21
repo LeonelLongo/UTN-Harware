@@ -1,6 +1,10 @@
-function Protected({ isSignedIn, children, setShowLogin }) {
-  if (!isSignedIn) {
-    if (setShowLogin) setShowLogin(true);
+import { useAppContext } from "../../context/AppContext";
+
+function Protected({ children }) {
+  const { isLoggedIn, setShowLogin } = useAppContext();
+
+  if (!isLoggedIn) {
+    setShowLogin(true);
     return null;
   }
 

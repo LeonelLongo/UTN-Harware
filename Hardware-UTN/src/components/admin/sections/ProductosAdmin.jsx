@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Table, Button, Modal, Form, Badge } from "react-bootstrap";
-import Layout from "../layout/Layout";
-import { useAppContext } from "../../context/AppContext";
+import { useAppContext } from "../../../context/AppContext";
 
 const CATEGORIES = [
   "Periféricos",
@@ -16,9 +15,11 @@ const emptyForm = {
   imageUrl: "",
   summary: "",
   category: "",
+  subCategory: "",
+  isOffer: false,
 };
 
-function Admin() {
+function ProductosAdmin() {
   const { products, setProducts } = useAppContext();
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -44,8 +45,20 @@ function Admin() {
       imageUrl: product.imageUrl,
       summary: product.summary || "",
       category: product.category || "",
+      subCategory: product.subCategory || "",
+      isOffer: product.isOffer || false,
     });
     setShowModal(true);
+  };
+
+  const handleToggleOffer = async (product) => {
+    const res = await fetch(`http://localhost:3000/items/${product.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isOffer: !product.isOffer }),
+    });
+    const updated = await res.json();
+    setProducts(products.map((p) => (p.id === product.id ? updated : p)));
   };
 
   const handleSave = async () => {
@@ -57,21 +70,18 @@ function Admin() {
       imageUrl: form.imageUrl,
       summary: form.summary,
       category: form.category,
+      subCategory: form.subCategory,
+      isOffer: form.isOffer,
     };
 
     if (editingProduct) {
-      const res = await fetch(
-        `http://localhost:3000/items/${editingProduct.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        },
-      );
+      const res = await fetch(`http://localhost:3000/items/${editingProduct.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
       const updated = await res.json();
-      setProducts(
-        products.map((p) => (p.id === editingProduct.id ? updated : p)),
-      );
+      setProducts(products.map((p) => (p.id === editingProduct.id ? updated : p)));
     } else {
       const res = await fetch("http://localhost:3000/items", {
         method: "POST",
@@ -91,9 +101,9 @@ function Admin() {
   };
 
   return (
-    <Layout>
+    <div>
       <div className="d-flex justify-content-between align-items-center mb-4 gap-3">
-        <h4 className="fw-bold mb-0 flex-shrink-0">Panel de administración</h4>
+        <h4 className="fw-bold mb-0">Productos</h4>
         <Form.Control
           type="text"
           placeholder="Buscar producto..."
@@ -102,11 +112,7 @@ function Admin() {
           style={{ maxWidth: "300px" }}
         />
         <Button
-          style={{
-            backgroundColor: "var(--color-accent)",
-            border: "none",
-            flexShrink: 0,
-          }}
+          style={{ backgroundColor: "var(--color-accent)", border: "none", flexShrink: 0 }}
           onClick={openAdd}
         >
           + Agregar producto
@@ -114,14 +120,13 @@ function Admin() {
       </div>
 
       <Table responsive hover className="shadow-sm">
-        <thead
-          style={{ backgroundColor: "var(--color-header)", color: "white" }}
-        >
+        <thead style={{ backgroundColor: "var(--color-header)", color: "white" }}>
           <tr>
             <th style={{ width: "60px" }}>#</th>
             <th>Nombre</th>
             <th>Categoría</th>
             <th>Precio</th>
+            <th className="text-center">Oferta</th>
             <th>Imagen</th>
             <th className="text-center">Acciones</th>
           </tr>
@@ -129,15 +134,11 @@ function Admin() {
         <tbody>
           {filteredProducts.map((p) => (
             <tr key={p.id} className="align-middle">
-              <td>
-                <Badge bg="secondary">{p.id}</Badge>
-              </td>
+              <td><Badge bg="secondary">{p.id}</Badge></td>
               <td className="fw-semibold">{p.title}</td>
               <td>
                 {p.category ? (
-                  <Badge bg="info" className="text-dark">
-                    {p.category}
-                  </Badge>
+                  <Badge bg="info" className="text-dark">{p.category}</Badge>
                 ) : (
                   <span className="text-muted small">Sin categoría</span>
                 )}
@@ -145,42 +146,32 @@ function Admin() {
               <td style={{ color: "var(--color-accent)", fontWeight: 600 }}>
                 ${p.value.toLocaleString("es-AR")}
               </td>
+              <td className="text-center">
+                <Button
+                  size="sm"
+                  variant={p.isOffer ? "warning" : "outline-secondary"}
+                  onClick={() => handleToggleOffer(p)}
+                  title={p.isOffer ? "Quitar de ofertas" : "Poner en oferta"}
+                  style={{ fontSize: "0.75rem", padding: "2px 8px" }}
+                >
+                  {p.isOffer ? "✓ Oferta" : "—"}
+                </Button>
+              </td>
               <td>
                 {p.imageUrl ? (
-                  <img
-                    src={p.imageUrl}
-                    alt={p.title}
-                    style={{
-                      width: "50px",
-                      height: "50px",
-                      objectFit: "contain",
-                    }}
-                  />
+                  <img src={p.imageUrl} alt={p.title} style={{ width: "50px", height: "50px", objectFit: "contain" }} />
                 ) : (
                   <span className="text-muted small">Sin imagen</span>
                 )}
               </td>
               <td className="text-center">
                 <div className="d-flex gap-2 justify-content-center">
-                  <Button
-                    size="sm"
-                    variant="outline-primary"
-                    onClick={() => openEdit(p)}
-                  >
-                    Editar
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline-danger"
-                    onClick={() => setShowDeleteConfirm(p.id)}
-                  >
-                    Eliminar
-                  </Button>
+                  <Button size="sm" variant="outline-primary" onClick={() => openEdit(p)}>Editar</Button>
+                  <Button size="sm" variant="outline-danger" onClick={() => setShowDeleteConfirm(p.id)}>Eliminar</Button>
                 </div>
               </td>
             </tr>
           ))}
-
           {filteredProducts.length === 0 && (
             <tr>
               <td colSpan={6} className="text-center text-muted py-4">
@@ -191,7 +182,6 @@ function Admin() {
         </tbody>
       </Table>
 
-      {/* Modal agregar / editar */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold">
@@ -209,22 +199,24 @@ function Admin() {
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
               />
             </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label className="fw-semibold">Categoría</Form.Label>
-              <Form.Select
-                value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
-              >
+              <Form.Select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
                 <option value="">Sin categoría</option>
                 {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
+                  <option key={cat} value={cat}>{cat}</option>
                 ))}
               </Form.Select>
             </Form.Group>
-
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Subcategoría</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Ej: Teclados, Memorias RAM, SSD..."
+                value={form.subCategory}
+                onChange={(e) => setForm({ ...form, subCategory: e.target.value })}
+              />
+            </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label className="fw-semibold">Precio ($)</Form.Label>
               <Form.Control
@@ -234,7 +226,6 @@ function Admin() {
                 onChange={(e) => setForm({ ...form, value: e.target.value })}
               />
             </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label className="fw-semibold">URL de imagen</Form.Label>
               <Form.Control
@@ -245,18 +236,10 @@ function Admin() {
               />
               {form.imageUrl && (
                 <div className="mt-2 text-center">
-                  <img
-                    src={form.imageUrl}
-                    alt="preview"
-                    style={{ maxHeight: "100px", objectFit: "contain" }}
-                    onError={(e) => {
-                      e.target.style.display = "none";
-                    }}
-                  />
+                  <img src={form.imageUrl} alt="preview" style={{ maxHeight: "100px", objectFit: "contain" }} onError={(e) => { e.target.style.display = "none"; }} />
                 </div>
               )}
             </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label className="fw-semibold">Descripción</Form.Label>
               <Form.Control
@@ -267,15 +250,17 @@ function Admin() {
                 onChange={(e) => setForm({ ...form, summary: e.target.value })}
               />
             </Form.Group>
+            <Form.Check
+              type="switch"
+              id="isOffer-switch"
+              label="Publicar en Ofertas"
+              checked={form.isOffer}
+              onChange={(e) => setForm({ ...form, isOffer: e.target.checked })}
+            />
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="outline-secondary"
-            onClick={() => setShowModal(false)}
-          >
-            Cancelar
-          </Button>
+          <Button variant="outline-secondary" onClick={() => setShowModal(false)}>Cancelar</Button>
           <Button
             style={{ backgroundColor: "var(--color-accent)", border: "none" }}
             onClick={handleSave}
@@ -286,39 +271,22 @@ function Admin() {
         </Modal.Footer>
       </Modal>
 
-      {/* Modal confirmar eliminación */}
-      <Modal
-        show={showDeleteConfirm !== null}
-        onHide={() => setShowDeleteConfirm(null)}
-        centered
-      >
+      <Modal show={showDeleteConfirm !== null} onHide={() => setShowDeleteConfirm(null)} centered>
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold">Confirmar eliminación</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           ¿Estás seguro que querés eliminar{" "}
-          <strong>
-            {products.find((p) => p.id === showDeleteConfirm)?.title}
-          </strong>
-          ? Esta acción no se puede deshacer.
+          <strong>{products.find((p) => p.id === showDeleteConfirm)?.title}</strong>?
+          Esta acción no se puede deshacer.
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="outline-secondary"
-            onClick={() => setShowDeleteConfirm(null)}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="danger"
-            onClick={() => handleDelete(showDeleteConfirm)}
-          >
-            Eliminar
-          </Button>
+          <Button variant="outline-secondary" onClick={() => setShowDeleteConfirm(null)}>Cancelar</Button>
+          <Button variant="danger" onClick={() => handleDelete(showDeleteConfirm)}>Eliminar</Button>
         </Modal.Footer>
       </Modal>
-    </Layout>
+    </div>
   );
 }
 
-export default Admin;
+export default ProductosAdmin;

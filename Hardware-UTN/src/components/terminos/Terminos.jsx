@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import Layout from "../layout/Layout";
 
-function Terminos({ setShowLogin }) {
+function Terminos() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   return (
-    <Layout setShowLogin={setShowLogin}>
+    <Layout>
       <div
         style={{ maxWidth: "800px", margin: "0 auto", padding: "40px 16px" }}
       >
@@ -21,7 +21,7 @@ function Terminos({ setShowLogin }) {
             fontSize: "0.9rem",
           }}
         >
-          Última actualización: mayo 2025
+          Última actualización: mayo 2026
         </p>
 
         <Section title="1. Aceptación de los términos">
@@ -44,21 +44,21 @@ function Terminos({ setShowLogin }) {
           IVA. Hardware UTN acepta pagos con tarjeta de crédito, débito y
           transferencia bancaria. En caso de error en el precio publicado, nos
           reservamos el derecho de cancelar la orden afectada, notificando al
-          cliente de inmediato.
+          cliente en el proceso.
         </Section>
 
         <Section title="4. Proceso de compra y envíos">
           Una vez confirmado el pago, el pedido será procesado en un plazo de 1
           a 3 días hábiles. Los envíos se realizan a través de correo oficial o
           transporte privado según la localidad del comprador. Hardware UTN no
-          se responsabiliza por demoras ocasionadas por el servicio de
+          se responsabiliza por demoras y/o daños ocasionados por el servicio de
           transporte una vez despachado el pedido.
         </Section>
 
         <Section title="5. Garantía y devoluciones">
           Todos los productos cuentan con garantía del fabricante. Ante
           cualquier desperfecto de fábrica dentro del período de garantía, el
-          cliente debe contactarse con nosotros dentro de los 30 días de
+          cliente debe ponerse en contacto con el fabricante correspondiente dentro de los 30 días de
           recibido el producto. No se aceptan devoluciones por cambio de opinión
           una vez que el producto ha sido utilizado.
         </Section>
@@ -74,8 +74,7 @@ function Terminos({ setShowLogin }) {
           Los datos personales ingresados al momento del registro son utilizados
           exclusivamente para gestionar pedidos y mejorar la experiencia de
           compra. No compartimos información con terceros sin consentimiento del
-          usuario. Para más información, consultá nuestra Política de
-          Privacidad.
+          usuario.
         </Section>
 
         <Section title="8. Modificaciones">
@@ -86,8 +85,8 @@ function Terminos({ setShowLogin }) {
         </Section>
 
         <Section title="9. Contacto">
-          Ante cualquier consulta relacionada con estos términos, podés
-          comunicarte con nosotros a través de nuestras redes sociales o al
+          Ante cualquier inconveniente relacionado con estos términos, puedes
+          ponerte en contacto a través de nuestras redes sociales o al
           correo oficial de Hardware UTN.
         </Section>
       </div>

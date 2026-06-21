@@ -1,7 +1,9 @@
 import { Users } from "../Models/users.js";
 
 export const getAllUsers = async (req, res) => {
-  const users = await Users.findAll();
+  const { email } = req.query;
+  const where = email ? { mailAdress: email } : {};
+  const users = await Users.findAll({ where });
   res.json(users);
 };
 
@@ -13,7 +15,7 @@ export const findUsers = async (req, res) => {
 };
 
 export const createUsers = async (req, res) => {
-  const { firstName, lastName, userName, mailAdress, password } = req.body;
+  const { firstName, lastName, userName, mailAdress, password, rol } = req.body;
   if (!firstName || !lastName || !userName || !mailAdress || !password)
     return res.status(400).json({ message: "Todos los campos son requeridos" });
   const user = await Users.create({
@@ -22,6 +24,7 @@ export const createUsers = async (req, res) => {
     userName,
     mailAdress,
     password,
+    ...(rol && { rol }),
   });
   res.status(201).json(user);
 };
@@ -38,4 +41,20 @@ export const deleteUsers = async (req, res) => {
   const { userId } = req.params;
   await Users.destroy({ where: { userId } });
   res.json({ message: `Usuario ${userId} eliminado` });
+};
+
+export const loginUser = async (req, res) => {
+  const { mailAdress, password } = req.body;
+  if (!mailAdress || !password)
+    return res.status(400).json({ message: "Email y contraseña son requeridos" });
+
+  const user = await Users.findOne({ where: { mailAdress } });
+  if (!user)
+    return res.status(404).json({ message: "El email no está registrado" });
+
+  if (user.password !== password)
+    return res.status(401).json({ message: "Contraseña incorrecta" });
+
+  const { password: _, ...userData } = user.toJSON();
+  res.json(userData);
 };

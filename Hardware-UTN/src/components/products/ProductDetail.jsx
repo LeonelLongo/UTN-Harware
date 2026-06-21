@@ -2,14 +2,10 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Row, Col, Button, Card, Badge } from "react-bootstrap";
 import Layout from "../layout/Layout";
+import { useAppContext } from "../../context/AppContext";
 
-function ProductDetail({
-  cart,
-  setCart,
-  isLoggedIn,
-  setIsLoggedIn,
-  setShowLogin,
-}) {
+function ProductDetail() {
+  const { cart, setCart, isLoggedIn, setShowLogin } = useAppContext();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -21,19 +17,9 @@ function ProductDetail({
       .catch((err) => console.log(err));
   }, [id]);
 
-  const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
-
   if (!product) {
     return (
-      <Layout
-        cartCount={cartCount}
-        isLoggedIn={isLoggedIn}
-        onLogout={() => {
-          setIsLoggedIn(false);
-          navigate("/");
-        }}
-        setShowLogin={setShowLogin}
-      >
+      <Layout>
         <p className="text-muted text-center mt-5">Producto no encontrado.</p>
         <div className="text-center">
           <Link to="/" style={{ color: "var(--color-accent)" }}>
@@ -78,15 +64,7 @@ function ProductDetail({
   const quantityInCart = cart.find((p) => p.id === product.id)?.quantity ?? 0;
 
   return (
-    <Layout
-      cartCount={cartCount}
-      isLoggedIn={isLoggedIn}
-      onLogout={() => {
-        setIsLoggedIn(false);
-        navigate("/");
-      }}
-      setShowLogin={setShowLogin}
-    >
+    <Layout>
       <Link
         to="/"
         className="text-decoration-none small d-inline-block mb-4"

@@ -3,31 +3,25 @@ import { Container } from "react-bootstrap";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import Footer from "./Footer";
 import LoginPrompt from "../auth/LoginPrompt";
+import { useAppContext } from "../../context/AppContext";
+import { FiUser, FiShoppingCart } from "react-icons/fi";
+
 
 const CATEGORIES = [
   "Periféricos",
   "Componentes",
   "Almacenamiento",
-  "Audio y Video",
   "Accesorios",
 ];
 
 const NAV_LINKS = [
   { label: "Productos", to: "/productos" },
-  { label: "Ofertas", to: "/ofertas" },
   { label: "Cómo Comprar", to: "/como-comprar" },
 ];
 
-function Layout({
-  children,
-  cartCount = 0,
-  onSearchChange = null,
-  initialSearch = "",
-  isLoggedIn = false,
-  isAdmin = false,
-  onLogout = null,
-  setShowLogin,
-}) {
+function Layout({ children, onSearchChange = null, initialSearch = "" }) {
+  const { isLoggedIn, isAdmin, isSuperAdmin, handleLogout, setShowLogin, cart } = useAppContext();
+  const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState(initialSearch);
   const [showCartPrompt, setShowCartPrompt] = useState(false);
@@ -79,6 +73,10 @@ function Layout({
         >
           <Link
             to="/"
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.transform = "scale(1.05)")
+            }
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
             style={{
               display: "flex",
               alignItems: "center",
@@ -86,6 +84,7 @@ function Layout({
               textDecoration: "none",
               color: "white",
               flexShrink: 0,
+              transition: "transform 0.2s ease",
             }}
           >
             <img src="/logo.png" alt="logo" style={{ width: "40px" }} />
@@ -100,7 +99,7 @@ function Layout({
             </span>
           </Link>
 
-          {isAdmin && (
+          {(isAdmin || isSuperAdmin) && (
             <Link
               to="/admin"
               style={{
@@ -115,7 +114,7 @@ function Layout({
                 flexShrink: 0,
               }}
             >
-              Productos
+              ADMIN
             </Link>
           )}
 
@@ -179,7 +178,7 @@ function Layout({
             {isLoggedIn ? (
               <button
                 onClick={() => {
-                  onLogout?.();
+                  handleLogout();
                   navigate("/");
                 }}
                 style={{
@@ -207,9 +206,12 @@ function Layout({
                   fontSize: "0.95rem",
                   border: "1px solid white",
                   cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
                 }}
               >
-                Iniciar sesión
+                <FiUser style={{ marginRight: "6px" }} />
+                Ingresa
               </button>
             )}
 
@@ -229,6 +231,7 @@ function Layout({
                 fontSize: "0.95rem",
               }}
             >
+              <FiShoppingCart />
               Carrito
               {cartCount > 0 && (
                 <span
@@ -256,31 +259,31 @@ function Layout({
       {/* Nav secundaria — fondo blanco, fuera del bloque oscuro */}
       <div
         style={{
-          backgroundColor: "white",
-          borderBottom: "1px solid #e5e5e5",
+          background: "rgba(100, 100, 100, 0.12)",
+          borderBottom: "5px solid rgba(0, 0, 0, 0.1)",
+          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.06)",
           position: "sticky",
           top: "64px",
           zIndex: 999,
         }}
       >
         <Container>
-          <nav style={{ display: "flex", justifyContent: "center" }}>
+          <nav
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "4px",
+              padding: "8px 0",
+            }}
+          >
             {NAV_LINKS.map(({ label, to }) => (
               <NavLink
                 key={label}
                 to={to}
                 end={to === "/"}
-                style={({ isActive }) => ({
-                  color: isActive ? "var(--color-accent)" : "#444",
-                  textDecoration: "none",
-                  padding: "10px 24px",
-                  fontSize: "0.9rem",
-                  fontWeight: isActive ? 700 : 500,
-                  borderBottom: isActive
-                    ? "2px solid var(--color-accent)"
-                    : "2px solid transparent",
-                  transition: "color 0.15s",
-                })}
+                className={({ isActive }) =>
+                  `subnav-link${isActive ? " active" : ""}`
+                }
               >
                 {label}
               </NavLink>

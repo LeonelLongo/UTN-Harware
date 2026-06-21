@@ -19,7 +19,7 @@ export const Purchase = sequelize.define(
       defaultValue: DataTypes.NOW,
     },
     status: {
-      type: DataTypes.ENUM("PENDING", "COMPLETE"),
+      type: DataTypes.ENUM("PENDING", "COMPLETE", "CANCELED"),
       allowNull: false,
       defaultValue: "PENDING",
     },
