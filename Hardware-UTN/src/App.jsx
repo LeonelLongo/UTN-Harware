@@ -13,6 +13,7 @@ import AdminPanel from "./components/admin/AdminPanel";
 import Protected from "./components/auth/Protected";
 import NotFound from "./components/notFound/NotFound";
 import ProductDetail from "./components/products/ProductDetail";
+import MisCompras from "./components/purchases/MisCompras";
 
 function App() {
   const {
@@ -66,6 +67,14 @@ function App() {
           element={
             <Protected>
               <Cart />
+            </Protected>
+          }
+        />
+        <Route
+          path="/mis-compras"
+          element={
+            <Protected>
+              <MisCompras />
             </Protected>
           }
         />
