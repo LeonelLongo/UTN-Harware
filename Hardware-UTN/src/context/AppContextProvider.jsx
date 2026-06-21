@@ -5,6 +5,7 @@ export const AppContextProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [cart, setCart] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
@@ -22,6 +23,7 @@ export const AppContextProvider = ({ children }) => {
     setIsLoggedIn(false);
     setIsAdmin(false);
     setIsSuperAdmin(false);
+    setCurrentUser(null);
     setCart([]);
   };
 
@@ -34,6 +36,8 @@ export const AppContextProvider = ({ children }) => {
         setIsAdmin,
         isSuperAdmin,
         setIsSuperAdmin,
+        currentUser,
+        setCurrentUser,
         cart,
         setCart,
         showLogin,
