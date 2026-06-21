@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, Card, Form, FormGroup } from "react-bootstrap";
 
-const Login = ({ setIsLoggedIn, setIsAdmin, setIsSuperAdmin, onClose, onSwitchToRegister }) => {
+const Login = ({ setIsLoggedIn, setIsAdmin, setIsSuperAdmin, setCurrentUser, onClose, onSwitchToRegister }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: false, password: false });
@@ -55,6 +55,7 @@ const Login = ({ setIsLoggedIn, setIsAdmin, setIsSuperAdmin, onClose, onSwitchTo
 
       const userData = await res.json();
       setIsLoggedIn(true);
+      setCurrentUser?.(userData);
       if (userData.rol === "admin") setIsAdmin(true);
       if (userData.rol === "superAdmin") setIsSuperAdmin(true);
       onClose();
