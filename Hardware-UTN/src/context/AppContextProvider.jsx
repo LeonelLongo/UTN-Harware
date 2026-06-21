@@ -1,11 +1,24 @@
 import { useState, useEffect } from "react";
 import { AppContext } from "./AppContext";
 
+const STORAGE_KEY = "hardware-utn-user";
+
+const getStoredUser = () => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+};
+
 export const AppContextProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const storedUser = getStoredUser();
+
+  const [isLoggedIn, setIsLoggedIn] = useState(!!storedUser);
+  const [isAdmin, setIsAdmin] = useState(storedUser?.rol === "admin");
+  const [isSuperAdmin, setIsSuperAdmin] = useState(storedUser?.rol === "superAdmin");
+  const [currentUser, setCurrentUser] = useState(storedUser);
   const [cart, setCart] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
@@ -18,6 +31,14 @@ export const AppContextProvider = ({ children }) => {
       .then((data) => setProducts(data))
       .catch((err) => console.log(err));
   }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }, [currentUser]);
 
   const handleLogout = () => {
     setIsLoggedIn(false);
