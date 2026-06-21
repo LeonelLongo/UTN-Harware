@@ -16,6 +16,8 @@ const emptyForm = {
   imageUrl: "",
   summary: "",
   category: "",
+  subCategory: "",
+  isOffer: false,
 };
 
 function ProductosAdmin() {
@@ -44,8 +46,20 @@ function ProductosAdmin() {
       imageUrl: product.imageUrl,
       summary: product.summary || "",
       category: product.category || "",
+      subCategory: product.subCategory || "",
+      isOffer: product.isOffer || false,
     });
     setShowModal(true);
+  };
+
+  const handleToggleOffer = async (product) => {
+    const res = await fetch(`http://localhost:3000/items/${product.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isOffer: !product.isOffer }),
+    });
+    const updated = await res.json();
+    setProducts(products.map((p) => (p.id === product.id ? updated : p)));
   };
 
   const handleSave = async () => {
@@ -57,6 +71,8 @@ function ProductosAdmin() {
       imageUrl: form.imageUrl,
       summary: form.summary,
       category: form.category,
+      subCategory: form.subCategory,
+      isOffer: form.isOffer,
     };
 
     if (editingProduct) {
@@ -111,6 +127,7 @@ function ProductosAdmin() {
             <th>Nombre</th>
             <th>Categoría</th>
             <th>Precio</th>
+            <th className="text-center">Oferta</th>
             <th>Imagen</th>
             <th className="text-center">Acciones</th>
           </tr>
@@ -129,6 +146,17 @@ function ProductosAdmin() {
               </td>
               <td style={{ color: "var(--color-accent)", fontWeight: 600 }}>
                 ${p.value.toLocaleString("es-AR")}
+              </td>
+              <td className="text-center">
+                <Button
+                  size="sm"
+                  variant={p.isOffer ? "warning" : "outline-secondary"}
+                  onClick={() => handleToggleOffer(p)}
+                  title={p.isOffer ? "Quitar de ofertas" : "Poner en oferta"}
+                  style={{ fontSize: "0.75rem", padding: "2px 8px" }}
+                >
+                  {p.isOffer ? "✓ Oferta" : "—"}
+                </Button>
               </td>
               <td>
                 {p.imageUrl ? (
@@ -182,6 +210,15 @@ function ProductosAdmin() {
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Subcategoría</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Ej: Teclados, Memorias RAM, SSD..."
+                value={form.subCategory}
+                onChange={(e) => setForm({ ...form, subCategory: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
               <Form.Label className="fw-semibold">Precio ($)</Form.Label>
               <Form.Control
                 type="number"
@@ -214,6 +251,13 @@ function ProductosAdmin() {
                 onChange={(e) => setForm({ ...form, summary: e.target.value })}
               />
             </Form.Group>
+            <Form.Check
+              type="switch"
+              id="isOffer-switch"
+              label="Publicar en Ofertas"
+              checked={form.isOffer}
+              onChange={(e) => setForm({ ...form, isOffer: e.target.checked })}
+            />
           </Form>
         </Modal.Body>
         <Modal.Footer>

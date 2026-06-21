@@ -11,13 +11,13 @@ const PASOS = [
     numero: 2,
     titulo: "Agregá al carrito",
     descripcion:
-      'Una vez que encontraste lo que buscás, hacé clic en "Agregar al carrito". Podés seguir comprando y agregar más productos antes de pagar.',
+      'Una vez que encontraste lo que buscás, hacé clic en "Agregar al carrito". Para ver tu carrito y agregar productos al mismo deberás iniciar sesión',
   },
   {
     numero: 3,
     titulo: "Iniciá sesión",
     descripcion:
-      "Para finalizar tu compra necesitás tener una cuenta. Si no tenés, podés registrarte en segundos. Solo necesitás tu nombre, email y una contraseña.",
+      "Para armar tu carrito y finalizar tu compra necesitás tener una cuenta. Si no tenés, podés registrarte en segundos. Solo necesitás tu nombre, email y una contraseña.",
   },
   {
     numero: 4,

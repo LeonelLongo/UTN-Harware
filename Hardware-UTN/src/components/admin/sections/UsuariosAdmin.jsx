@@ -8,8 +8,7 @@ const emptyForm = {
   userName: "",
   mailAdress: "",
   password: "",
-  admin: false,
-  superAdmin: false,
+  rol: "user",
 };
 
 function UsuariosAdmin() {
@@ -49,8 +48,7 @@ function UsuariosAdmin() {
       userName: user.userName,
       mailAdress: user.mailAdress,
       password: "",
-      admin: user.admin || false,
-      superAdmin: user.superAdmin || false,
+      rol: user.rol || "user",
     });
     setShowModal(true);
   };
@@ -64,7 +62,7 @@ function UsuariosAdmin() {
       userName: form.userName,
       mailAdress: form.mailAdress,
       ...(form.password && { password: form.password }),
-      ...(isSuperAdmin && { admin: form.admin, superAdmin: form.superAdmin }),
+      ...(isSuperAdmin && { rol: form.rol }),
     };
 
     if (editingUser) {
@@ -94,8 +92,8 @@ function UsuariosAdmin() {
   };
 
   const getRolBadge = (user) => {
-    if (user.superAdmin) return <Badge bg="danger">Super Admin</Badge>;
-    if (user.admin) return <Badge bg="warning" text="dark">Admin</Badge>;
+    if (user.rol === "superAdmin") return <Badge bg="danger">Super Admin</Badge>;
+    if (user.rol === "admin") return <Badge bg="warning" text="dark">Admin</Badge>;
     return <Badge bg="secondary">Usuario</Badge>;
   };
 
@@ -204,26 +202,17 @@ function UsuariosAdmin() {
               />
             </Form.Group>
             {isSuperAdmin && (
-              <div className="border rounded p-3 mt-2">
-                <p className="fw-semibold mb-2 small text-muted">Roles (solo Super Admin)</p>
-                <Form.Check
-                  type="checkbox"
-                  label="Admin"
-                  checked={form.admin}
-                  onChange={(e) =>
-                    setForm({ ...form, admin: e.target.checked, superAdmin: e.target.checked ? false : form.superAdmin })
-                  }
-                  className="mb-2"
-                />
-                <Form.Check
-                  type="checkbox"
-                  label="Super Admin"
-                  checked={form.superAdmin}
-                  onChange={(e) =>
-                    setForm({ ...form, superAdmin: e.target.checked, admin: e.target.checked ? false : form.admin })
-                  }
-                />
-              </div>
+              <Form.Group className="mt-3">
+                <Form.Label className="fw-semibold">Rol</Form.Label>
+                <Form.Select
+                  value={form.rol}
+                  onChange={(e) => setForm({ ...form, rol: e.target.value })}
+                >
+                  <option value="user">Usuario</option>
+                  <option value="admin">Admin</option>
+                  <option value="superAdmin">Super Admin</option>
+                </Form.Select>
+              </Form.Group>
             )}
           </Form>
         </Modal.Body>

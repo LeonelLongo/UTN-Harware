@@ -19,7 +19,6 @@ function QuienesSomos() {
             fontSize: "0.9rem",
           }}
         >
-          Rosario, Santa Fe — Argentina
         </p>
 
         <Section title="Nuestros comienzos">

@@ -1,15 +1,54 @@
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-function ProductItem({ id, name, price, image, onAdd, onRemove, quantityInCart = 0 }) {
+function ProductItem({ id, name, price, image, onAdd, onRemove, quantityInCart = 0, isNew = false, discount = 0 }) {
   const navigate = useNavigate();
+  const discountedPrice = discount > 0 ? Math.round(price * (1 - discount / 100) * 100) / 100 : null;
 
   return (
     <Card
       className="h-100 product-card"
-      style={{ cursor: "pointer" }}
+      style={{ cursor: "pointer", position: "relative" }}
       onClick={() => navigate(`/producto/${id}`)}
     >
+      {isNew && (
+        <div style={{
+          position: "absolute",
+          top: "10px",
+          right: "10px",
+          backgroundColor: "var(--color-accent)",
+          color: "white",
+          padding: "3px 9px",
+          borderRadius: "4px",
+          fontSize: "0.7rem",
+          fontWeight: 700,
+          letterSpacing: "0.06em",
+          zIndex: 1,
+          boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
+        }}>
+          NEW
+        </div>
+      )}
+
+      {discount > 0 && (
+        <div style={{
+          position: "absolute",
+          top: "10px",
+          right: "10px",
+          backgroundColor: "#e53935",
+          color: "white",
+          padding: "3px 9px",
+          borderRadius: "4px",
+          fontSize: "0.7rem",
+          fontWeight: 700,
+          letterSpacing: "0.06em",
+          zIndex: 1,
+          boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
+        }}>
+          -{discount}%
+        </div>
+      )}
+
       {image && (
         <div
           style={{
@@ -35,9 +74,20 @@ function ProductItem({ id, name, price, image, onAdd, onRemove, quantityInCart =
       </Card.Header>
 
       <Card.Body className="d-flex flex-column justify-content-between">
-        <span className="fw-bold fs-4" style={{ color: "var(--color-accent)" }}>
-          ${price.toLocaleString("es-AR")}
-        </span>
+        {discountedPrice != null ? (
+          <div>
+            <span style={{ textDecoration: "line-through", color: "#aaa", fontSize: "0.9rem" }}>
+              ${price.toLocaleString("es-AR")}
+            </span>
+            <span className="fw-bold fs-4 d-block" style={{ color: "var(--color-accent)" }}>
+              ${discountedPrice.toLocaleString("es-AR")}
+            </span>
+          </div>
+        ) : (
+          <span className="fw-bold fs-4" style={{ color: "var(--color-accent)" }}>
+            ${price.toLocaleString("es-AR")}
+          </span>
+        )}
 
         {quantityInCart > 0 ? (
           <div
