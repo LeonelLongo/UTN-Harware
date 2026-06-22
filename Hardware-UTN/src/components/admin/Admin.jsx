@@ -3,12 +3,7 @@ import { Table, Button, Modal, Form, Badge } from "react-bootstrap";
 import Layout from "../layout/Layout";
 import { useAppContext } from "../../context/AppContext";
 
-const CATEGORIES = [
-  "Periféricos",
-  "Componentes",
-  "Almacenamiento",
-  "Accesorios",
-];
+const CATEGORIES = ["Periféricos", "Componentes", "Accesorios"];
 
 const emptyForm = {
   title: "",
@@ -27,7 +22,7 @@ function Admin() {
   const [search, setSearch] = useState("");
 
   const filteredProducts = products.filter((p) =>
-    p.title.toLowerCase().includes(search.toLowerCase())
+    p.title.toLowerCase().includes(search.toLowerCase()),
   );
 
   const openAdd = () => {

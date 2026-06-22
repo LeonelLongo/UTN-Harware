@@ -34,21 +34,29 @@ function ComprasAdmin() {
       body: JSON.stringify({ status: newStatus }),
     });
     const updated = await res.json();
-    setPurchases(purchases.map((p) => (p.purchaseId === purchaseId ? updated : p)));
+    setPurchases(
+      purchases.map((p) => (p.purchaseId === purchaseId ? updated : p)),
+    );
     setShowStatusModal(null);
   };
 
   const handleDelete = async (purchaseId) => {
-    await fetch(`http://localhost:3000/purchases/${purchaseId}`, { method: "DELETE" });
+    await fetch(`http://localhost:3000/purchases/${purchaseId}`, {
+      method: "DELETE",
+    });
     setPurchases(purchases.filter((p) => p.purchaseId !== purchaseId));
     setShowDeleteConfirm(null);
   };
 
-  const getStatusBadge = (status) => (
-    <Badge bg={status === "COMPLETE" ? "success" : "warning"} text={status === "COMPLETE" ? "white" : "dark"}>
-      {status}
-    </Badge>
-  );
+  const getStatusBadge = (status) => {
+    if (status === "COMPLETE") return <Badge bg="success">COMPLETE</Badge>;
+    if (status === "CANCELED") return <Badge bg="danger">CANCELED</Badge>;
+    return (
+      <Badge bg="warning" text="dark">
+        PENDING
+      </Badge>
+    );
+  };
 
   return (
     <div>
@@ -64,13 +72,15 @@ function ComprasAdmin() {
       </div>
 
       <Table responsive hover className="shadow-sm">
-        <thead style={{ backgroundColor: "var(--color-header)", color: "white" }}>
+        <thead
+          style={{ backgroundColor: "var(--color-header)", color: "white" }}
+        >
           <tr>
             <th style={{ width: "60px" }}>#</th>
             <th>Usuario</th>
-            <th>Producto</th>
-            <th className="text-center">Cantidad</th>
-            <th>Precio</th>
+            <th>Productos</th>
+            <th className="text-center">Items</th>
+            <th>Total</th>
             <th>Fecha</th>
             <th>Estado</th>
             <th className="text-center">Acciones</th>
@@ -79,14 +89,36 @@ function ComprasAdmin() {
         <tbody>
           {filteredPurchases.map((p) => (
             <tr key={p.purchaseId} className="align-middle">
-              <td><Badge bg="secondary">{p.purchaseId}</Badge></td>
               <td>
-                {p.User
-                  ? <span className="fw-semibold">{p.User.firstName} {p.User.lastName}</span>
-                  : <span className="text-muted">ID {p.userId}</span>
-                }
+                <Badge bg="secondary">{p.purchaseId}</Badge>
               </td>
-              <td>{p.product}</td>
+              <td>
+                {p.User ? (
+                  <span className="fw-semibold">
+                    {p.User.firstName} {p.User.lastName}
+                  </span>
+                ) : (
+                  <span className="text-muted">ID {p.userId}</span>
+                )}
+              </td>
+              <td>
+                {(() => {
+                  try {
+                    const items = JSON.parse(p.items);
+                    return (
+                      <ul className="mb-0 ps-3 small">
+                        {items.map((item, i) => (
+                          <li key={i}>
+                            {item.title} x{item.quantity}
+                          </li>
+                        ))}
+                      </ul>
+                    );
+                  } catch {
+                    return <span className="text-muted small">{p.items}</span>;
+                  }
+                })()}
+              </td>
               <td className="text-center">{p.quantity}</td>
               <td style={{ color: "var(--color-accent)", fontWeight: 600 }}>
                 ${Number(p.price).toLocaleString("es-AR")}
@@ -95,10 +127,18 @@ function ComprasAdmin() {
               <td>{getStatusBadge(p.status)}</td>
               <td className="text-center">
                 <div className="d-flex gap-2 justify-content-center">
-                  <Button size="sm" variant="outline-primary" onClick={() => openStatusModal(p)}>
+                  <Button
+                    size="sm"
+                    variant="outline-primary"
+                    onClick={() => openStatusModal(p)}
+                  >
                     Estado
                   </Button>
-                  <Button size="sm" variant="outline-danger" onClick={() => setShowDeleteConfirm(p.purchaseId)}>
+                  <Button
+                    size="sm"
+                    variant="outline-danger"
+                    onClick={() => setShowDeleteConfirm(p.purchaseId)}
+                  >
                     Eliminar
                   </Button>
                 </div>
@@ -116,18 +156,33 @@ function ComprasAdmin() {
       </Table>
 
       {/* Modal cambiar estado */}
-      <Modal show={showStatusModal !== null} onHide={() => setShowStatusModal(null)} centered>
+      <Modal
+        show={showStatusModal !== null}
+        onHide={() => setShowStatusModal(null)}
+        centered
+      >
         <Modal.Header closeButton>
-          <Modal.Title className="fw-bold">Cambiar estado de la compra</Modal.Title>
+          <Modal.Title className="fw-bold">
+            Cambiar estado de la compra
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form.Select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
+          <Form.Select
+            value={newStatus}
+            onChange={(e) => setNewStatus(e.target.value)}
+          >
             <option value="PENDING">PENDING</option>
             <option value="COMPLETE">COMPLETE</option>
+            <option value="CANCELED">CANCELED</option>
           </Form.Select>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-secondary" onClick={() => setShowStatusModal(null)}>Cancelar</Button>
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowStatusModal(null)}
+          >
+            Cancelar
+          </Button>
           <Button
             style={{ backgroundColor: "var(--color-accent)", border: "none" }}
             onClick={() => handleUpdateStatus(showStatusModal)}
@@ -138,17 +193,32 @@ function ComprasAdmin() {
       </Modal>
 
       {/* Modal confirmar eliminación */}
-      <Modal show={showDeleteConfirm !== null} onHide={() => setShowDeleteConfirm(null)} centered>
+      <Modal
+        show={showDeleteConfirm !== null}
+        onHide={() => setShowDeleteConfirm(null)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold">Confirmar eliminación</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           ¿Estás seguro que querés eliminar la compra{" "}
-          <strong>#{showDeleteConfirm}</strong>? Esta acción no se puede deshacer.
+          <strong>#{showDeleteConfirm}</strong>? Esta acción no se puede
+          deshacer.
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-secondary" onClick={() => setShowDeleteConfirm(null)}>Cancelar</Button>
-          <Button variant="danger" onClick={() => handleDelete(showDeleteConfirm)}>Eliminar</Button>
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowDeleteConfirm(null)}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => handleDelete(showDeleteConfirm)}
+          >
+            Eliminar
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>

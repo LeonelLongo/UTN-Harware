@@ -66,20 +66,21 @@ function Cart() {
   const handleCheckout = async () => {
     setCheckoutLoading(true);
     try {
-      await Promise.all(
-        cart.map((item) =>
-          fetch("http://localhost:3000/purchases", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              userId: currentUser?.userId,
-              product: item.title,
-              quantity: item.quantity,
-              price: item.value * item.quantity,
-            }),
-          })
-        )
-      );
+      const res = await fetch("http://localhost:3000/purchases", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: currentUser?.userId,
+          items: cart.map((item) => ({
+            title: item.title,
+            quantity: item.quantity,
+            unitPrice: item.value,
+            subtotal: item.value * item.quantity,
+          })),
+          price: total,
+        }),
+      });
+      if (!res.ok) throw new Error(`Error ${res.status}`);
       setReceiptItems([...cart]);
       setReceiptTotal(total);
       setReceiptNumber(`${new Date().toLocaleDateString("es-AR").replace(/\//g, "")}-${Date.now().toString().slice(-4)}`);

@@ -17,11 +17,15 @@ function MisCompras() {
       .finally(() => setLoading(false));
   }, [currentUser]);
 
-  const getStatusBadge = (status) => (
-    <Badge bg={status === "COMPLETE" ? "success" : "warning"} text={status === "COMPLETE" ? "white" : "dark"}>
-      {status}
-    </Badge>
-  );
+  const getStatusBadge = (status) => {
+    if (status === "COMPLETE") return <Badge bg="success">COMPLETE</Badge>;
+    if (status === "CANCELED") return <Badge bg="danger">CANCELED</Badge>;
+    return (
+      <Badge bg="warning" text="dark">
+        PENDING
+      </Badge>
+    );
+  };
 
   return (
     <Layout>
@@ -39,25 +43,59 @@ function MisCompras() {
         <Card className="shadow-sm">
           <Card.Body className="p-0">
             <Table responsive hover className="mb-0">
-              <thead style={{ backgroundColor: "var(--color-header)", color: "white" }}>
+              <thead
+                style={{
+                  backgroundColor: "var(--color-header)",
+                  color: "white",
+                }}
+              >
                 <tr>
-                  <th className="ps-3">Producto</th>
-                  <th className="text-center">Cantidad</th>
-                  <th className="text-end">Precio</th>
+                  <th className="ps-3">#</th>
+                  <th>Productos</th>
+                  <th className="text-end">Total</th>
                   <th>Fecha</th>
                   <th>Estado</th>
                 </tr>
               </thead>
               <tbody>
-                {purchases.map((p) => (
-                  <tr key={p.purchaseId} className="align-middle">
-                    <td className="ps-3 fw-semibold">{p.product}</td>
-                    <td className="text-center">{p.quantity}</td>
-                    <td className="text-end">${Number(p.price).toLocaleString("es-AR")}</td>
-                    <td>{new Date(p.purchaseDate).toLocaleDateString("es-AR")}</td>
-                    <td>{getStatusBadge(p.status)}</td>
-                  </tr>
-                ))}
+                {purchases.map((p) => {
+                  let items = [];
+                  try {
+                    items = JSON.parse(p.items);
+                  } catch {
+                    /* raw string fallback */
+                  }
+                  return (
+                    <tr key={p.purchaseId} className="align-middle">
+                      <td className="ps-3">
+                        <Badge bg="secondary">{p.purchaseId}</Badge>
+                      </td>
+                      <td>
+                        {items.length > 0 ? (
+                          <ul className="mb-0 ps-3 small">
+                            {items.map((item, i) => (
+                              <li key={i}>
+                                {item.title} x{item.quantity}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <span className="text-muted small">{p.items}</span>
+                        )}
+                      </td>
+                      <td
+                        className="text-end fw-semibold"
+                        style={{ color: "var(--color-accent)" }}
+                      >
+                        ${Number(p.price).toLocaleString("es-AR")}
+                      </td>
+                      <td>
+                        {new Date(p.purchaseDate).toLocaleDateString("es-AR")}
+                      </td>
+                      <td>{getStatusBadge(p.status)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </Table>
           </Card.Body>

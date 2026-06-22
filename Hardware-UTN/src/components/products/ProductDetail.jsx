@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Row, Col, Button, Card, Badge } from "react-bootstrap";
+import { Row, Col, Button, Badge } from "react-bootstrap";
 import Layout from "../layout/Layout";
 import { useAppContext } from "../../context/AppContext";
 
@@ -10,6 +10,7 @@ function ProductDetail() {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
+
   useEffect(() => {
     fetch(`http://localhost:3000/items/${id}`)
       .then((res) => res.json())
@@ -22,26 +23,17 @@ function ProductDetail() {
       <Layout>
         <p className="text-muted text-center mt-5">Producto no encontrado.</p>
         <div className="text-center">
-          <Link to="/" style={{ color: "var(--color-accent)" }}>
-            ← Volver al inicio
-          </Link>
+          <Link to="/" style={{ color: "var(--color-accent)" }}>← Volver al inicio</Link>
         </div>
       </Layout>
     );
   }
 
   const handleAddToCart = () => {
-    if (!isLoggedIn) {
-      setShowLogin(true);
-      return;
-    }
+    if (!isLoggedIn) { setShowLogin(true); return; }
     const existing = cart.find((p) => p.id === product.id);
     if (existing) {
-      setCart(
-        cart.map((p) =>
-          p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p,
-        ),
-      );
+      setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p));
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
@@ -53,93 +45,213 @@ function ProductDetail() {
     if (existing.quantity === 1) {
       setCart(cart.filter((p) => p.id !== product.id));
     } else {
-      setCart(
-        cart.map((p) =>
-          p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p,
-        ),
-      );
+      setCart(cart.map((p) => p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p));
     }
   };
 
   const quantityInCart = cart.find((p) => p.id === product.id)?.quantity ?? 0;
+  const parsedSpecs = (() => {
+    if (!product.specs) return null;
+    if (typeof product.specs === "object") return product.specs;
+    try { return JSON.parse(product.specs); } catch { return null; }
+  })();
+  const hasSpecs = parsedSpecs && Object.keys(parsedSpecs).length > 0;
+  const hasSummary = product.summary && product.summary.trim().length > 0;
+  const discountPct = product.isOffer && product.originalPrice
+    ? Math.round((1 - product.value / product.originalPrice) * 100)
+    : null;
 
   return (
     <Layout>
-      <Link
-        to="/"
-        className="text-decoration-none small d-inline-block mb-4"
-        style={{ color: "var(--color-accent)" }}
-      >
-        ← Volver al inicio
-      </Link>
+      {/* Breadcrumb */}
+      <nav style={{ marginBottom: "20px", fontSize: "0.85rem" }}>
+        <Link to="/" style={{ color: "var(--color-accent)", textDecoration: "none" }}>Inicio</Link>
+        <span style={{ margin: "0 6px", color: "var(--color-text-muted)" }}>›</span>
+        <Link to="/productos" style={{ color: "var(--color-accent)", textDecoration: "none" }}>Productos</Link>
+        <span style={{ margin: "0 6px", color: "var(--color-text-muted)" }}>›</span>
+        <span style={{ color: "var(--color-text-muted)" }}>{product.title}</span>
+      </nav>
 
-      <Card className="shadow-sm border-0 p-4">
-        <Row className="align-items-center g-4">
-          <Col md={6} className="text-center">
-            <div
-              style={{
-                backgroundColor: "#f8f8f8",
-                borderRadius: "var(--border-radius)",
-                padding: "32px",
-              }}
-            >
+      {/* Card principal */}
+      <div style={{
+        backgroundColor: "var(--color-surface)",
+        borderRadius: "var(--border-radius)",
+        boxShadow: "var(--shadow-md)",
+        overflow: "hidden",
+        marginBottom: "24px",
+        padding: "32px",
+      }}>
+        <Row className="g-5">
+          {/* Imagen */}
+          <Col md={5}>
+            <div style={{
+              backgroundColor: "#f8f8f8",
+              borderRadius: "var(--border-radius)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "340px",
+              padding: "32px",
+              position: "relative",
+            }}>
+              {discountPct && (
+                <div style={{
+                  position: "absolute",
+                  top: "12px",
+                  left: "12px",
+                  backgroundColor: "#e53935",
+                  color: "white",
+                  padding: "4px 10px",
+                  borderRadius: "4px",
+                  fontSize: "0.8rem",
+                  fontWeight: 700,
+                }}>
+                  -{discountPct}%
+                </div>
+              )}
               <img
                 src={product.imageUrl}
                 alt={product.title}
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "320px",
-                  objectFit: "contain",
-                }}
+                style={{ maxWidth: "100%", maxHeight: "280px", objectFit: "contain" }}
               />
             </div>
           </Col>
 
-          <Col md={6}>
-            <h2 className="fw-bold mb-3">{product.title}</h2>
-            <p
-              className="fw-bold mb-4"
-              style={{ color: "var(--color-accent)", fontSize: "2rem" }}
-            >
-              ${product.value.toLocaleString("es-AR")}
-            </p>
+          {/* Info */}
+          <Col md={7}>
+            {/* Categoría + badges */}
+            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "8px" }}>
+              {product.category && (
+                <span style={{ fontSize: "0.82rem", color: "var(--color-accent)", fontWeight: 600 }}>
+                  {product.category}
+                </span>
+              )}
+            </div>
 
+            {/* Título */}
+            <h2 style={{ fontWeight: 700, fontSize: "1.4rem", marginBottom: "8px", lineHeight: 1.3 }}>
+              {product.title}
+            </h2>
+
+            {/* ID del producto */}
+            <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
+              <span style={{
+                fontSize: "0.78rem",
+                color: "var(--color-text-muted)",
+                backgroundColor: "#f0f0f0",
+                padding: "3px 10px",
+                borderRadius: "4px",
+              }}>
+                ID: {product.id}
+              </span>
+              {product.sku && (
+                <span style={{
+                  fontSize: "0.78rem",
+                  color: "var(--color-text-muted)",
+                  backgroundColor: "#f0f0f0",
+                  padding: "3px 10px",
+                  borderRadius: "4px",
+                }}>
+                  SKU: {product.sku}
+                </span>
+              )}
+            </div>
+
+            {/* Summary */}
+            {hasSummary && (
+              <p style={{ color: "var(--color-text-muted)", fontSize: "0.9rem", marginBottom: "16px", lineHeight: 1.6 }}>
+                {product.summary}
+              </p>
+            )}
+
+            {/* Precio */}
+            <div style={{
+              backgroundColor: "#f8f8f8",
+              borderRadius: "var(--border-radius)",
+              padding: "20px",
+              marginBottom: "16px",
+              border: "1px solid var(--color-border)",
+            }}>
+              {discountPct ? (
+                <>
+                  <div style={{ fontSize: "0.82rem", color: "var(--color-accent)", fontWeight: 600, marginBottom: "4px" }}>
+                    Mejor precio
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
+                    <span style={{ textDecoration: "line-through", color: "#aaa", fontSize: "0.95rem" }}>
+                      ${product.originalPrice.toLocaleString("es-AR")}
+                    </span>
+                    <span style={{
+                      backgroundColor: "#e53935",
+                      color: "white",
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      padding: "2px 7px",
+                      borderRadius: "4px",
+                    }}>
+                      -{discountPct}%
+                    </span>
+                  </div>
+                  <div style={{ color: "var(--color-accent)", fontSize: "2rem", fontWeight: 800, lineHeight: 1 }}>
+                    ${product.value.toLocaleString("es-AR")}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: "0.82rem", color: "var(--color-text-muted)", marginBottom: "4px" }}>Precio</div>
+                  <div style={{ color: "var(--color-accent)", fontSize: "2rem", fontWeight: 800, lineHeight: 1 }}>
+                    ${product.value.toLocaleString("es-AR")}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Info extra */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "24px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.88rem", color: "var(--color-success, #2e7d32)" }}>
+                <span style={{ fontSize: "1rem" }}>✓</span>
+                <span style={{ fontWeight: 600 }}>Stock disponible</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.88rem", color: "var(--color-text-muted)" }}>
+                <span>🛡</span>
+                <span>Garantía - 12 meses</span>
+                <span
+                  style={{ color: "var(--color-accent)", cursor: "pointer", textDecoration: "underline" }}
+                  onClick={() => navigate("/terminos")}
+                >
+                  Ver términos y condiciones
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.88rem", color: "var(--color-text-muted)" }}>
+                <span>🚚</span>
+                <span>Envíos a todo el país</span>
+              </div>
+            </div>
+
+            {/* Botón carrito */}
             {quantityInCart > 0 ? (
-              <div className="d-flex align-items-center gap-3 mb-4">
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <Button
-                  size="lg"
                   variant="outline-secondary"
-                  style={{
-                    width: "48px",
-                    height: "48px",
-                    padding: 0,
-                    lineHeight: 1,
-                    flexShrink: 0,
-                  }}
+                  style={{ width: "48px", height: "48px", padding: 0, lineHeight: 1, fontSize: "1.4rem", flexShrink: 0 }}
                   onClick={handleRemoveFromCart}
                 >
                   −
                 </Button>
-                <Badge
-                  className="flex-grow-1 text-center py-3"
-                  style={{
-                    backgroundColor: "var(--color-accent)",
-                    fontSize: "1rem",
-                  }}
-                >
+                <div style={{
+                  flex: 1,
+                  textAlign: "center",
+                  backgroundColor: "var(--color-accent)",
+                  color: "white",
+                  borderRadius: "var(--border-radius)",
+                  padding: "13px",
+                  fontWeight: 600,
+                  fontSize: "1rem",
+                }}>
                   {quantityInCart} en carrito
-                </Badge>
+                </div>
                 <Button
-                  size="lg"
-                  style={{
-                    width: "48px",
-                    height: "48px",
-                    padding: 0,
-                    lineHeight: 1,
-                    flexShrink: 0,
-                    backgroundColor: "var(--color-accent)",
-                    border: "none",
-                  }}
+                  style={{ width: "48px", height: "48px", padding: 0, lineHeight: 1, fontSize: "1.4rem", flexShrink: 0, backgroundColor: "var(--color-accent)", border: "none" }}
                   onClick={handleAddToCart}
                 >
                   +
@@ -148,21 +260,95 @@ function ProductDetail() {
             ) : (
               <Button
                 size="lg"
-                className="w-100 fw-semibold mb-4"
-                style={{
-                  backgroundColor: "var(--color-accent)",
-                  border: "none",
-                }}
+                className="w-100 fw-semibold"
+                style={{ backgroundColor: "var(--color-accent)", border: "none", padding: "14px", fontSize: "1rem" }}
                 onClick={handleAddToCart}
               >
-                Agregar al carrito
+                🛒 Sumar al carrito
               </Button>
             )}
 
-            {product.summary && <p className="text-muted">{product.summary}</p>}
+            <Button
+              variant="link"
+              className="w-100 mt-2"
+              style={{ color: "var(--color-text-muted)", fontSize: "0.88rem", textDecoration: "none" }}
+              onClick={() => navigate(-1)}
+            >
+              ← Seguir comprando
+            </Button>
           </Col>
         </Row>
-      </Card>
+      </div>
+
+      {/* Descripción */}
+      {product.description && product.description.trim().length > 0 && (
+        <div style={{
+          backgroundColor: "var(--color-surface)",
+          borderRadius: "var(--border-radius)",
+          boxShadow: "var(--shadow-sm)",
+          padding: "28px 32px",
+          marginBottom: "16px",
+        }}>
+          <h5 style={{
+            fontWeight: 700,
+            marginBottom: "16px",
+            borderLeft: "4px solid var(--color-accent)",
+            paddingLeft: "12px",
+          }}>
+            Descripción
+          </h5>
+          <p style={{ color: "var(--color-text)", lineHeight: 1.8, fontSize: "0.97rem", margin: 0, maxWidth: "720px" }}>
+            {product.description}
+          </p>
+        </div>
+      )}
+
+      {/* Especificaciones */}
+      {hasSpecs && (
+        <div style={{
+          backgroundColor: "var(--color-surface)",
+          borderRadius: "var(--border-radius)",
+          boxShadow: "var(--shadow-sm)",
+          padding: "28px 32px",
+        }}>
+          <h5 style={{
+            fontWeight: 700,
+            marginBottom: "16px",
+            borderLeft: "4px solid var(--color-accent)",
+            paddingLeft: "12px",
+          }}>
+            Especificaciones
+          </h5>
+          <div style={{ maxWidth: "600px" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <tbody>
+                {Object.entries(parsedSpecs).map(([key, value], i) => (
+                  <tr key={key} style={{ backgroundColor: i % 2 === 0 ? "#f8f8f8" : "white" }}>
+                    <td style={{
+                      padding: "12px 16px",
+                      fontWeight: 600,
+                      color: "var(--color-text)",
+                      width: "40%",
+                      borderBottom: "1px solid var(--color-border)",
+                      fontSize: "0.9rem",
+                    }}>
+                      {key}
+                    </td>
+                    <td style={{
+                      padding: "12px 16px",
+                      color: "var(--color-text-muted)",
+                      borderBottom: "1px solid var(--color-border)",
+                      fontSize: "0.9rem",
+                    }}>
+                      {value}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
