@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { AppContext } from "./AppContext";
 
 const STORAGE_KEY = "hardware-utn-user";
+const LOGIN_DRAFT_KEY = "login_draft_email";
 
 const getStoredUser = () => {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = sessionStorage.getItem(STORAGE_KEY);
     return stored ? JSON.parse(stored) : null;
   } catch {
     return null;
@@ -34,9 +35,9 @@ export const AppContextProvider = ({ children }) => {
 
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
     } else {
-      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
     }
   }, [currentUser]);
 
@@ -46,6 +47,7 @@ export const AppContextProvider = ({ children }) => {
     setIsSuperAdmin(false);
     setCurrentUser(null);
     setCart([]);
+    localStorage.removeItem(LOGIN_DRAFT_KEY);
   };
 
   return (

@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button, Card, Form, FormGroup } from "react-bootstrap";
 
+const LOGIN_DRAFT_KEY = "login_draft_email";
+
 const Login = ({ setIsLoggedIn, setIsAdmin, setIsSuperAdmin, setCurrentUser, onClose, onSwitchToRegister }) => {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => localStorage.getItem(LOGIN_DRAFT_KEY) || "");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: false, password: false });
   const [showPassword, setShowPassword] = useState(false);
@@ -10,6 +12,10 @@ const Login = ({ setIsLoggedIn, setIsAdmin, setIsSuperAdmin, setCurrentUser, onC
   const [loginError, setLoginError] = useState({ type: null, message: "" });
 
   const clearLoginError = () => setLoginError({ type: null, message: "" });
+
+  useEffect(() => {
+    localStorage.setItem(LOGIN_DRAFT_KEY, email);
+  }, [email]);
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
