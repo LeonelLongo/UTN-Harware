@@ -1,6 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Container } from "react-bootstrap";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
+
+const SECTION_COLORS = [
+  { bg: "rgba(100, 100, 100, 0.12)", border: "rgba(0, 0, 0, 0.1)", shadow: "0 2px 10px rgba(0,0,0,0.06)" },
+  { bg: "rgba(232, 96, 10, 0.18)",   border: "rgba(232, 96, 10, 0.35)", shadow: "0 2px 10px rgba(232,96,10,0.12)" },
+  { bg: "rgba(59, 130, 246, 0.15)",  border: "rgba(59, 130, 246, 0.3)", shadow: "0 2px 10px rgba(59,130,246,0.1)" },
+  { bg: "rgba(16, 185, 129, 0.15)",  border: "rgba(16, 185, 129, 0.3)", shadow: "0 2px 10px rgba(16,185,129,0.1)" },
+  { bg: "rgba(139, 92, 246, 0.15)",  border: "rgba(139, 92, 246, 0.3)", shadow: "0 2px 10px rgba(139,92,246,0.1)" },
+];
 import Footer from "./Footer";
 import LoginPrompt from "../auth/LoginPrompt";
 import UserMenu from "./UserMenu";
@@ -23,8 +31,31 @@ const NAV_LINKS = [
 function Layout({ children, onSearchChange = null, initialSearch = "" }) {
   const { isLoggedIn, isAdmin, isSuperAdmin, setShowLogin, cart } = useAppContext();
   const cartCount = cart.reduce((acc, p) => acc + p.quantity, 0);
+  const location = useLocation();
   const [inputValue, setInputValue] = useState(initialSearch);
   const [showCartPrompt, setShowCartPrompt] = useState(false);
+  const [navColor, setNavColor] = useState(SECTION_COLORS[0]);
+
+  useEffect(() => {
+    setNavColor(SECTION_COLORS[0]);
+    const sections = Array.from(document.querySelectorAll("section"));
+    if (!sections.length) return;
+
+    const intersecting = new Map();
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        const i = sections.indexOf(e.target);
+        if (e.isIntersecting) intersecting.set(i, e.intersectionRatio);
+        else intersecting.delete(i);
+      });
+      if (!intersecting.size) { setNavColor(SECTION_COLORS[0]); return; }
+      const topIdx = [...intersecting.entries()].reduce((a, b) => a[1] > b[1] ? a : b)[0];
+      setNavColor(SECTION_COLORS[(topIdx % (SECTION_COLORS.length - 1)) + 1]);
+    }, { threshold: [0, 0.1, 0.25, 0.5] });
+
+    sections.forEach((s) => observer.observe(s));
+    return () => observer.disconnect();
+  }, [location.pathname]);
 
   const handleSearch = () => {
     if (onSearchChange) onSearchChange(inputValue);
@@ -72,32 +103,31 @@ function Layout({ children, onSearchChange = null, initialSearch = "" }) {
           }}
         >
           <Link
-            to="/"
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "scale(1.05)")
-            }
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              textDecoration: "none",
-              color: "white",
-              flexShrink: 0,
-              transition: "transform 0.2s ease",
-            }}
-          >
-            <img src="/logo.png" alt="logo" style={{ width: "40px" }} />
-            <span
-              style={{
-                fontWeight: 700,
-                fontSize: "1.1rem",
-                color: "var(--color-accent)",
-              }}
-            >
-              Hardware UTN
-            </span>
-          </Link>
+  to="/"
+  onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
+  onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    textDecoration: "none",
+    color: "white",
+    flexShrink: 0,
+    transition: "transform 0.2s ease",
+  }}
+>
+  <img src="/logo.png" alt="logo" style={{ width: "40px" }} />
+  <span
+    style={{
+      fontWeight: 700,
+      fontSize: "1.1rem",
+      color: "var(--color-accent)",
+    }}
+  >
+    Hardware UTN
+  </span>
+</Link>
+
 
           {(isAdmin || isSuperAdmin) && (
             <Link
@@ -245,12 +275,13 @@ function Layout({ children, onSearchChange = null, initialSearch = "" }) {
       {/* Nav secundaria — fondo blanco, fuera del bloque oscuro */}
       <div
         style={{
-          background: "rgba(100, 100, 100, 0.12)",
-          borderBottom: "5px solid rgba(0, 0, 0, 0.1)",
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.06)",
+          background: navColor.bg,
+          borderBottom: `5px solid ${navColor.border}`,
+          boxShadow: navColor.shadow,
           position: "sticky",
           top: "64px",
           zIndex: 999,
+          transition: "background 0.5s ease, border-bottom 0.5s ease, box-shadow 0.5s ease",
         }}
       >
         <Container>
