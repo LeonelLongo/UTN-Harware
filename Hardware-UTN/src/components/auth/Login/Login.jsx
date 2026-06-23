@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
 import { Button, Card, Form, FormGroup } from "react-bootstrap";
+import { useAppContext } from "../../../context/AppContext";
+import { BASE_URL } from "../../../services/apiConfig";
+import { validateEmail } from "../../../services/auth/auth.helpers";
+import { errorToast } from "../../../services/notifications";
 
 const LOGIN_DRAFT_KEY = "login_draft_email";
 
-const Login = ({ setIsLoggedIn, setIsAdmin, setIsSuperAdmin, setCurrentUser, onClose, onSwitchToRegister }) => {
-  const [email, setEmail] = useState(() => localStorage.getItem(LOGIN_DRAFT_KEY) || "");
+const Login = ({ onClose, onSwitchToRegister }) => {
+  const { handleUserLogin } = useAppContext();
+  const [email, setEmail] = useState(
+    () => localStorage.getItem(LOGIN_DRAFT_KEY) || "",
+  );
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: false, password: false });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loginError, setLoginError] = useState({ type: null, message: "" });
-
-  const clearLoginError = () => setLoginError({ type: null, message: "" });
 
   useEffect(() => {
     localStorage.setItem(LOGIN_DRAFT_KEY, email);
@@ -20,56 +24,50 @@ const Login = ({ setIsLoggedIn, setIsAdmin, setIsSuperAdmin, setCurrentUser, onC
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
     setErrors({ ...errors, email: false });
-    clearLoginError();
   };
 
   const handlePasswordChange = (event) => {
     setPassword(event.target.value);
     setErrors({ ...errors, password: false });
-    clearLoginError();
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
+
     const newErrors = {
-      email: email.trim() === "",
-      password: password.length < 7,
+      email: !validateEmail(email),
+      password: password.length === 0,
     };
     setErrors(newErrors);
-    if (newErrors.email || newErrors.password) return;
+    if (newErrors.email || newErrors.password) {
+      errorToast("Revisá el email y la contraseña ingresados.");
+      return;
+    }
 
     setLoading(true);
-    try {
-      const res = await fetch("http://localhost:3000/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mailAdress: email, password }),
-      });
-
-      if (res.status === 404) {
-        setLoginError({ type: "notFound", message: "Este email no está registrado." });
-        return;
-      }
-      if (res.status === 401) {
-        setLoginError({ type: "wrongPassword", message: "Contraseña incorrecta." });
-        return;
-      }
-      if (!res.ok) {
-        setLoginError({ type: "error", message: "Error al iniciar sesión. Intentá de nuevo." });
-        return;
-      }
-
-      const userData = await res.json();
-      setIsLoggedIn(true);
-      setCurrentUser?.(userData);
-      if (userData.rol === "admin") setIsAdmin(true);
-      if (userData.rol === "superAdmin") setIsSuperAdmin(true);
-      onClose();
-    } catch {
-      setLoginError({ type: "error", message: "No se pudo conectar con el servidor." });
-    } finally {
-      setLoading(false);
-    }
+    fetch(`${BASE_URL}/users/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mailAdress: email, password }),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const errData = await res.json();
+          const error = new Error(errData.message || "Error al iniciar sesión");
+          error.status = res.status;
+          throw error;
+        }
+        return res.json();
+      })
+      .then((token) => {
+        handleUserLogin(token);
+        onClose();
+      })
+      .catch((err) => {
+        errorToast(err.message || "No se pudo conectar con el servidor.");
+        if (err.status === 404) onSwitchToRegister?.(email);
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -112,29 +110,6 @@ const Login = ({ setIsLoggedIn, setIsAdmin, setIsSuperAdmin, setCurrentUser, onC
               Ingresá tus credenciales para continuar
             </p>
 
-            {loginError.type === "notFound" && (
-              <div className="alert alert-warning py-2 small mb-3 d-flex align-items-center justify-content-between gap-2">
-                <span>{loginError.message}</span>
-                <button
-                  type="button"
-                  onClick={() => onSwitchToRegister?.(email)}
-                  style={{ background: "none", border: "none", padding: 0, fontWeight: 600, color: "var(--color-accent)", cursor: "pointer", whiteSpace: "nowrap" }}
-                >
-                  Registrarme →
-                </button>
-              </div>
-            )}
-            {loginError.type === "wrongPassword" && (
-              <div className="alert alert-danger py-2 small mb-3">
-                {loginError.message}
-              </div>
-            )}
-            {loginError.type === "error" && (
-              <div className="alert alert-danger py-2 small mb-3">
-                {loginError.message}
-              </div>
-            )}
-
             <Form onSubmit={handleSubmit}>
               <FormGroup className="mb-3">
                 <Form.Label className="fw-semibold small">Email</Form.Label>
@@ -151,11 +126,13 @@ const Login = ({ setIsLoggedIn, setIsAdmin, setIsSuperAdmin, setCurrentUser, onC
               </FormGroup>
 
               <FormGroup className="mb-4">
-                <Form.Label className="fw-semibold small">Contraseña</Form.Label>
+                <Form.Label className="fw-semibold small">
+                  Contraseña
+                </Form.Label>
                 <div style={{ position: "relative" }}>
                   <Form.Control
                     type={showPassword ? "text" : "password"}
-                    placeholder="Mínimo 7 caracteres"
+                    placeholder="Ingresar contraseña"
                     value={password}
                     onChange={handlePasswordChange}
                     isInvalid={errors.password}
@@ -179,22 +156,51 @@ const Login = ({ setIsLoggedIn, setIsAdmin, setIsSuperAdmin, setCurrentUser, onC
                     }}
                   >
                     {showPassword ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                        />
                       </svg>
                     ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
                       </svg>
                     )}
                   </button>
                 </div>
-                {errors.password && (
-                  <div style={{ color: "#dc3545", fontSize: "0.875em", marginTop: "4px" }}>
-                    La contraseña debe tener al menos 7 caracteres.
-                  </div>
-                )}
+                <Form.Control.Feedback
+                  type="invalid"
+                  style={{ display: errors.password ? "block" : "none" }}
+                >
+                  Debe ingresar una contraseña.
+                </Form.Control.Feedback>
               </FormGroup>
 
               <div className="d-grid gap-2">

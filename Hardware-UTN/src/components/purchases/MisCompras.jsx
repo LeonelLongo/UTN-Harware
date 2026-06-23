@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Table, Badge, Card } from "react-bootstrap";
 import Layout from "../layout/Layout";
 import { useAppContext } from "../../context/AppContext";
+import { BASE_URL, getAuthHeaders } from "../../services/apiConfig";
 
 function MisCompras() {
   const { currentUser } = useAppContext();
@@ -10,7 +11,9 @@ function MisCompras() {
 
   useEffect(() => {
     if (!currentUser?.userId) return;
-    fetch(`http://localhost:3000/purchases/user/${currentUser.userId}`)
+    fetch(`${BASE_URL}/purchases/user/${currentUser.userId}`, {
+      headers: getAuthHeaders(),
+    })
       .then((res) => res.json())
       .then((data) => setPurchases(data))
       .catch((err) => console.log(err))

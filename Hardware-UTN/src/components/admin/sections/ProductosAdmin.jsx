@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Table, Button, Modal, Form, Badge } from "react-bootstrap";
 import { useAppContext } from "../../../context/AppContext";
+import { BASE_URL, getAuthHeaders } from "../../../services/apiConfig";
+import { errorToast, successToast } from "../../../services/notifications";
 
 const CATEGORIES = [
   "Periféricos",
@@ -28,7 +30,7 @@ function ProductosAdmin() {
   const [search, setSearch] = useState("");
 
   const filteredProducts = products.filter((p) =>
-    p.title.toLowerCase().includes(search.toLowerCase())
+    p.title.toLowerCase().includes(search.toLowerCase()),
   );
 
   const openAdd = () => {
@@ -52,13 +54,18 @@ function ProductosAdmin() {
   };
 
   const handleToggleOffer = async (product) => {
-    const res = await fetch(`http://localhost:3000/items/${product.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isOffer: !product.isOffer }),
-    });
-    const updated = await res.json();
-    setProducts(products.map((p) => (p.id === product.id ? updated : p)));
+    try {
+      const res = await fetch(`${BASE_URL}/items/${product.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ isOffer: !product.isOffer }),
+      });
+      if (!res.ok) throw new Error("No se pudo actualizar la oferta.");
+      const updated = await res.json();
+      setProducts(products.map((p) => (p.id === product.id ? updated : p)));
+    } catch (err) {
+      errorToast(err.message);
+    }
   };
 
   const handleSave = async () => {
@@ -74,30 +81,50 @@ function ProductosAdmin() {
       isOffer: form.isOffer,
     };
 
-    if (editingProduct) {
-      const res = await fetch(`http://localhost:3000/items/${editingProduct.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const updated = await res.json();
-      setProducts(products.map((p) => (p.id === editingProduct.id ? updated : p)));
-    } else {
-      const res = await fetch("http://localhost:3000/items", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const created = await res.json();
-      setProducts([...products, created]);
+    try {
+      if (editingProduct) {
+        const res = await fetch(`${BASE_URL}/items/${editingProduct.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) throw new Error("No se pudo editar el producto.");
+        const updated = await res.json();
+        setProducts(
+          products.map((p) => (p.id === editingProduct.id ? updated : p)),
+        );
+        successToast("Producto editado correctamente.");
+      } else {
+        const res = await fetch(`${BASE_URL}/items`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) throw new Error("No se pudo crear el producto.");
+        const created = await res.json();
+        setProducts([...products, created]);
+        successToast("Producto agregado correctamente.");
+      }
+      setShowModal(false);
+    } catch (err) {
+      errorToast(err.message);
     }
-    setShowModal(false);
   };
 
   const handleDelete = async (id) => {
-    await fetch(`http://localhost:3000/items/${id}`, { method: "DELETE" });
-    setProducts(products.filter((p) => p.id !== id));
-    setShowDeleteConfirm(null);
+    try {
+      const res = await fetch(`${BASE_URL}/items/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error("No se pudo eliminar el producto.");
+      setProducts(products.filter((p) => p.id !== id));
+      successToast("Producto eliminado correctamente.");
+    } catch (err) {
+      errorToast(err.message);
+    } finally {
+      setShowDeleteConfirm(null);
+    }
   };
 
   return (
@@ -112,7 +139,11 @@ function ProductosAdmin() {
           style={{ maxWidth: "300px" }}
         />
         <Button
-          style={{ backgroundColor: "var(--color-accent)", border: "none", flexShrink: 0 }}
+          style={{
+            backgroundColor: "var(--color-accent)",
+            border: "none",
+            flexShrink: 0,
+          }}
           onClick={openAdd}
         >
           + Agregar producto
@@ -120,7 +151,9 @@ function ProductosAdmin() {
       </div>
 
       <Table responsive hover className="shadow-sm">
-        <thead style={{ backgroundColor: "var(--color-header)", color: "white" }}>
+        <thead
+          style={{ backgroundColor: "var(--color-header)", color: "white" }}
+        >
           <tr>
             <th style={{ width: "60px" }}>#</th>
             <th>Nombre</th>
@@ -134,11 +167,15 @@ function ProductosAdmin() {
         <tbody>
           {filteredProducts.map((p) => (
             <tr key={p.id} className="align-middle">
-              <td><Badge bg="secondary">{p.id}</Badge></td>
+              <td>
+                <Badge bg="secondary">{p.id}</Badge>
+              </td>
               <td className="fw-semibold">{p.title}</td>
               <td>
                 {p.category ? (
-                  <Badge bg="info" className="text-dark">{p.category}</Badge>
+                  <Badge bg="info" className="text-dark">
+                    {p.category}
+                  </Badge>
                 ) : (
                   <span className="text-muted small">Sin categoría</span>
                 )}
@@ -159,15 +196,35 @@ function ProductosAdmin() {
               </td>
               <td>
                 {p.imageUrl ? (
-                  <img src={p.imageUrl} alt={p.title} style={{ width: "50px", height: "50px", objectFit: "contain" }} />
+                  <img
+                    src={p.imageUrl}
+                    alt={p.title}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      objectFit: "contain",
+                    }}
+                  />
                 ) : (
                   <span className="text-muted small">Sin imagen</span>
                 )}
               </td>
               <td className="text-center">
                 <div className="d-flex gap-2 justify-content-center">
-                  <Button size="sm" variant="outline-primary" onClick={() => openEdit(p)}>Editar</Button>
-                  <Button size="sm" variant="outline-danger" onClick={() => setShowDeleteConfirm(p.id)}>Eliminar</Button>
+                  <Button
+                    size="sm"
+                    variant="outline-primary"
+                    onClick={() => openEdit(p)}
+                  >
+                    Editar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline-danger"
+                    onClick={() => setShowDeleteConfirm(p.id)}
+                  >
+                    Eliminar
+                  </Button>
                 </div>
               </td>
             </tr>
@@ -201,10 +258,15 @@ function ProductosAdmin() {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label className="fw-semibold">Categoría</Form.Label>
-              <Form.Select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+              <Form.Select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+              >
                 <option value="">Sin categoría</option>
                 {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
                 ))}
               </Form.Select>
             </Form.Group>
@@ -214,7 +276,9 @@ function ProductosAdmin() {
                 type="text"
                 placeholder="Ej: Teclados, Memorias RAM, SSD..."
                 value={form.subCategory}
-                onChange={(e) => setForm({ ...form, subCategory: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, subCategory: e.target.value })
+                }
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -236,7 +300,14 @@ function ProductosAdmin() {
               />
               {form.imageUrl && (
                 <div className="mt-2 text-center">
-                  <img src={form.imageUrl} alt="preview" style={{ maxHeight: "100px", objectFit: "contain" }} onError={(e) => { e.target.style.display = "none"; }} />
+                  <img
+                    src={form.imageUrl}
+                    alt="preview"
+                    style={{ maxHeight: "100px", objectFit: "contain" }}
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                    }}
+                  />
                 </div>
               )}
             </Form.Group>
@@ -260,7 +331,12 @@ function ProductosAdmin() {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-secondary" onClick={() => setShowModal(false)}>Cancelar</Button>
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowModal(false)}
+          >
+            Cancelar
+          </Button>
           <Button
             style={{ backgroundColor: "var(--color-accent)", border: "none" }}
             onClick={handleSave}
@@ -271,18 +347,34 @@ function ProductosAdmin() {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showDeleteConfirm !== null} onHide={() => setShowDeleteConfirm(null)} centered>
+      <Modal
+        show={showDeleteConfirm !== null}
+        onHide={() => setShowDeleteConfirm(null)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold">Confirmar eliminación</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           ¿Estás seguro que querés eliminar{" "}
-          <strong>{products.find((p) => p.id === showDeleteConfirm)?.title}</strong>?
-          Esta acción no se puede deshacer.
+          <strong>
+            {products.find((p) => p.id === showDeleteConfirm)?.title}
+          </strong>
+          ? Esta acción no se puede deshacer.
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-secondary" onClick={() => setShowDeleteConfirm(null)}>Cancelar</Button>
-          <Button variant="danger" onClick={() => handleDelete(showDeleteConfirm)}>Eliminar</Button>
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowDeleteConfirm(null)}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => handleDelete(showDeleteConfirm)}
+          >
+            Eliminar
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>

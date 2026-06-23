@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Table, Button, Modal, Form, Badge } from "react-bootstrap";
+import { BASE_URL, getAuthHeaders } from "../../../services/apiConfig";
+import { errorToast, successToast } from "../../../services/notifications";
 
 function ComprasAdmin() {
   const [purchases, setPurchases] = useState([]);
@@ -9,7 +11,7 @@ function ComprasAdmin() {
   const [filterUser, setFilterUser] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:3000/purchases")
+    fetch(`${BASE_URL}/purchases`, { headers: getAuthHeaders() })
       .then((res) => res.json())
       .then((data) => setPurchases(data))
       .catch((err) => console.log(err));
@@ -28,24 +30,39 @@ function ComprasAdmin() {
   };
 
   const handleUpdateStatus = async (purchaseId) => {
-    const res = await fetch(`http://localhost:3000/purchases/${purchaseId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: newStatus }),
-    });
-    const updated = await res.json();
-    setPurchases(
-      purchases.map((p) => (p.purchaseId === purchaseId ? updated : p)),
-    );
-    setShowStatusModal(null);
+    try {
+      const res = await fetch(`${BASE_URL}/purchases/${purchaseId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) throw new Error("No se pudo actualizar el estado.");
+      const updated = await res.json();
+      setPurchases(
+        purchases.map((p) => (p.purchaseId === purchaseId ? updated : p)),
+      );
+      successToast("Estado actualizado correctamente.");
+    } catch (err) {
+      errorToast(err.message);
+    } finally {
+      setShowStatusModal(null);
+    }
   };
 
   const handleDelete = async (purchaseId) => {
-    await fetch(`http://localhost:3000/purchases/${purchaseId}`, {
-      method: "DELETE",
-    });
-    setPurchases(purchases.filter((p) => p.purchaseId !== purchaseId));
-    setShowDeleteConfirm(null);
+    try {
+      const res = await fetch(`${BASE_URL}/purchases/${purchaseId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error("No se pudo eliminar la compra.");
+      setPurchases(purchases.filter((p) => p.purchaseId !== purchaseId));
+      successToast("Compra eliminada correctamente.");
+    } catch (err) {
+      errorToast(err.message);
+    } finally {
+      setShowDeleteConfirm(null);
+    }
   };
 
   const getStatusBadge = (status) => {
