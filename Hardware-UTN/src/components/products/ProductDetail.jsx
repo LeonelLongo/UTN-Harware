@@ -183,13 +183,6 @@ function ProductDetail() {
               {product.title}
             </h2>
 
-            {/* ID del producto */}
-            <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
-              <span style={{ fontSize: "0.78rem", color: "var(--color-text-muted)", backgroundColor: "#f0f0f0", padding: "3px 10px", borderRadius: "4px" }}>
-                ID: {product.id}
-              </span>
-            </div>
-
             {/* Precio */}
             <div
               style={{

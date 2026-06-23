@@ -46,8 +46,12 @@ export const updateStatus = async (req, res) => {
   const { status } = req.body;
   if (!status)
     return res.status(400).json({ message: "El campo status es requerido" });
-  await Purchase.update({ status }, { where: { purchaseId } });
   const purchase = await Purchase.findByPk(purchaseId);
+  if (!purchase)
+    return res.status(404).json({ message: "Compra no encontrada" });
+  if (purchase.status === "CANCELED")
+    return res.status(400).json({ message: "No se puede modificar una compra cancelada" });
+  await purchase.update({ status });
   res.json(purchase);
 };
 
