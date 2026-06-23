@@ -1,8 +1,20 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Row, Col, Table, Button, Card, Badge, Form, InputGroup, Modal } from "react-bootstrap";
+import {
+  Row,
+  Col,
+  Table,
+  Button,
+  Card,
+  Badge,
+  Form,
+  InputGroup,
+  Modal,
+} from "react-bootstrap";
 import Layout from "../layout/Layout";
 import { useAppContext } from "../../context/AppContext";
+import { BASE_URL, getAuthHeaders } from "../../services/apiConfig";
+import { errorToast } from "../../services/notifications";
 
 const CUPON_VALIDO = "TUP2026";
 const CUOTAS = 6;
@@ -24,7 +36,9 @@ function Cart() {
   };
 
   const handleIncrement = (id) => {
-    setCart(cart.map((p) => (p.id === id ? { ...p, quantity: p.quantity + 1 } : p)));
+    setCart(
+      cart.map((p) => (p.id === id ? { ...p, quantity: p.quantity + 1 } : p)),
+    );
   };
 
   const handleDecrement = (id) => {
@@ -32,7 +46,9 @@ function Cart() {
     if (item.quantity === 1) {
       handleRemove(id);
     } else {
-      setCart(cart.map((p) => (p.id === id ? { ...p, quantity: p.quantity - 1 } : p)));
+      setCart(
+        cart.map((p) => (p.id === id ? { ...p, quantity: p.quantity - 1 } : p)),
+      );
     }
   };
 
@@ -66,9 +82,9 @@ function Cart() {
   const handleCheckout = async () => {
     setCheckoutLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/purchases", {
+      const res = await fetch(`${BASE_URL}/purchases`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({
           userId: currentUser?.userId,
           items: cart.map((item) => ({
@@ -83,11 +99,13 @@ function Cart() {
       if (!res.ok) throw new Error(`Error ${res.status}`);
       setReceiptItems([...cart]);
       setReceiptTotal(total);
-      setReceiptNumber(`${new Date().toLocaleDateString("es-AR").replace(/\//g, "")}-${Date.now().toString().slice(-4)}`);
+      setReceiptNumber(
+        `${new Date().toLocaleDateString("es-AR").replace(/\//g, "")}-${Date.now().toString().slice(-4)}`,
+      );
       handleClear();
       setShowReceipt(true);
     } catch {
-      alert("Error al procesar la compra. Intentá de nuevo.");
+      errorToast("Error al procesar la compra. Intentá de nuevo.");
     } finally {
       setCheckoutLoading(false);
     }
@@ -110,7 +128,12 @@ function Cart() {
             <Card className="shadow-sm">
               <Card.Body className="p-0">
                 <Table responsive hover className="mb-0">
-                  <thead style={{ backgroundColor: "var(--color-header)", color: "white" }}>
+                  <thead
+                    style={{
+                      backgroundColor: "var(--color-header)",
+                      color: "white",
+                    }}
+                  >
                     <tr>
                       <th className="ps-3">Producto</th>
                       <th className="text-center">Cantidad</th>
@@ -129,25 +152,42 @@ function Cart() {
                               size="sm"
                               variant="outline-secondary"
                               onClick={() => handleDecrement(p.id)}
-                              style={{ width: "28px", height: "28px", padding: 0, lineHeight: 1 }}
+                              style={{
+                                width: "28px",
+                                height: "28px",
+                                padding: 0,
+                                lineHeight: 1,
+                              }}
                             >
                               −
                             </Button>
-                            <Badge bg="secondary" style={{ fontSize: "0.9rem", minWidth: "28px" }}>
+                            <Badge
+                              bg="secondary"
+                              style={{ fontSize: "0.9rem", minWidth: "28px" }}
+                            >
                               {p.quantity}
                             </Badge>
                             <Button
                               size="sm"
                               variant="outline-secondary"
                               onClick={() => handleIncrement(p.id)}
-                              style={{ width: "28px", height: "28px", padding: 0, lineHeight: 1 }}
+                              style={{
+                                width: "28px",
+                                height: "28px",
+                                padding: 0,
+                                lineHeight: 1,
+                              }}
                             >
                               +
                             </Button>
                           </div>
                         </td>
-                        <td className="text-end">${p.value.toLocaleString("es-AR")}</td>
-                        <td className="text-end fw-bold">${(p.value * p.quantity).toLocaleString("es-AR")}</td>
+                        <td className="text-end">
+                          ${p.value.toLocaleString("es-AR")}
+                        </td>
+                        <td className="text-end fw-bold">
+                          ${(p.value * p.quantity).toLocaleString("es-AR")}
+                        </td>
                         <td className="text-center">
                           <Button
                             size="sm"
@@ -164,7 +204,11 @@ function Cart() {
                 </Table>
               </Card.Body>
               <Card.Footer className="text-end">
-                <Button variant="outline-danger" size="sm" onClick={handleClear}>
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={handleClear}
+                >
                   Vaciar carrito
                 </Button>
               </Card.Footer>
@@ -173,22 +217,34 @@ function Cart() {
 
           <Col md={4}>
             <Card className="shadow-sm">
-              <Card.Header style={{ backgroundColor: "var(--color-header)", color: "white" }}>
+              <Card.Header
+                style={{
+                  backgroundColor: "var(--color-header)",
+                  color: "white",
+                }}
+              >
                 <strong>Resumen del pedido</strong>
               </Card.Header>
               <Card.Body>
                 {cart.map((p) => (
-                  <div key={p.id} className="d-flex justify-content-between mb-2 small">
+                  <div
+                    key={p.id}
+                    className="d-flex justify-content-between mb-2 small"
+                  >
                     <span className="text-muted">
                       {p.title} x{p.quantity}
                     </span>
-                    <span>${(p.value * p.quantity).toLocaleString("es-AR")}</span>
+                    <span>
+                      ${(p.value * p.quantity).toLocaleString("es-AR")}
+                    </span>
                   </div>
                 ))}
                 <hr />
                 <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
                   <span>Total</span>
-                  <span style={{ color: "var(--color-accent)" }}>${total.toLocaleString("es-AR")}</span>
+                  <span style={{ color: "var(--color-accent)" }}>
+                    ${total.toLocaleString("es-AR")}
+                  </span>
                 </div>
 
                 {!couponApplied ? (
@@ -197,13 +253,19 @@ function Cart() {
                       <Form.Control
                         placeholder="Código de cupón"
                         value={couponInput}
-                        onChange={(e) => { setCouponInput(e.target.value); setCouponError(false); }}
+                        onChange={(e) => {
+                          setCouponInput(e.target.value);
+                          setCouponError(false);
+                        }}
                         isInvalid={couponError}
                         size="sm"
                       />
                       <Button
                         size="sm"
-                        style={{ backgroundColor: "var(--color-accent)", border: "none" }}
+                        style={{
+                          backgroundColor: "var(--color-accent)",
+                          border: "none",
+                        }}
                         onClick={handleApplyCoupon}
                       >
                         Aplicar
@@ -216,7 +278,10 @@ function Cart() {
                 ) : (
                   <div
                     className="rounded p-3 mb-2"
-                    style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0" }}
+                    style={{
+                      backgroundColor: "#f0fdf4",
+                      border: "1px solid #bbf7d0",
+                    }}
                   >
                     <div className="d-flex justify-content-between align-items-center mb-2">
                       <span className="fw-semibold small text-success">
@@ -224,7 +289,13 @@ function Cart() {
                       </span>
                       <button
                         onClick={handleRemoveCoupon}
-                        style={{ background: "none", border: "none", color: "#6b7280", cursor: "pointer", fontSize: "0.8rem" }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "#6b7280",
+                          cursor: "pointer",
+                          fontSize: "0.8rem",
+                        }}
                       >
                         Quitar
                       </button>
@@ -232,7 +303,10 @@ function Cart() {
                     <p className="small text-muted mb-1">
                       {CUOTAS} cuotas sin interés de:
                     </p>
-                    <p className="fw-bold fs-5 mb-0" style={{ color: "var(--color-accent)" }}>
+                    <p
+                      className="fw-bold fs-5 mb-0"
+                      style={{ color: "var(--color-accent)" }}
+                    >
                       ${Number(cuotaValor).toLocaleString("es-AR")} / cuota
                     </p>
                   </div>
@@ -241,7 +315,10 @@ function Cart() {
               <Card.Footer className="d-grid">
                 <Button
                   size="lg"
-                  style={{ backgroundColor: "var(--color-accent)", border: "none" }}
+                  style={{
+                    backgroundColor: "var(--color-accent)",
+                    border: "none",
+                  }}
                   onClick={handleCheckout}
                   disabled={checkoutLoading}
                 >
@@ -253,24 +330,48 @@ function Cart() {
         </Row>
       )}
 
-      <Link to="/" className="text-decoration-none small d-inline-block mt-3" style={{ color: "var(--color-accent)" }}>
+      <Link
+        to="/"
+        className="text-decoration-none small d-inline-block mt-3"
+        style={{ color: "var(--color-accent)" }}
+      >
         ← Seguir comprando
       </Link>
 
-      <Modal show={showReceipt} onHide={() => { setShowReceipt(false); navigate("/"); }} centered size="lg">
-        <Modal.Header style={{ backgroundColor: "var(--color-header)", color: "white" }}>
+      <Modal
+        show={showReceipt}
+        onHide={() => {
+          setShowReceipt(false);
+          navigate("/");
+        }}
+        centered
+        size="lg"
+      >
+        <Modal.Header
+          style={{ backgroundColor: "var(--color-header)", color: "white" }}
+        >
           <Modal.Title className="fw-bold">¡Gracias por tu compra!</Modal.Title>
         </Modal.Header>
         <Modal.Body className="p-4">
           <div className="text-center mb-4">
             <div style={{ fontSize: "2.5rem" }}>✅</div>
             <h5 className="fw-bold mt-2">Tu pedido fue registrado con éxito</h5>
-            <p className="text-muted small mb-0">Recibo N° <strong>{receiptNumber}</strong></p>
-            <p className="text-muted small">{new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" })}</p>
+            <p className="text-muted small mb-0">
+              Recibo N° <strong>{receiptNumber}</strong>
+            </p>
+            <p className="text-muted small">
+              {new Date().toLocaleDateString("es-AR", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
           </div>
 
           <Table bordered size="sm" className="mb-3">
-            <thead style={{ backgroundColor: "var(--color-header)", color: "white" }}>
+            <thead
+              style={{ backgroundColor: "var(--color-header)", color: "white" }}
+            >
               <tr>
                 <th>Producto</th>
                 <th className="text-center">Cant.</th>
@@ -283,15 +384,24 @@ function Cart() {
                 <tr key={item.id}>
                   <td>{item.title}</td>
                   <td className="text-center">{item.quantity}</td>
-                  <td className="text-end">${item.value.toLocaleString("es-AR")}</td>
-                  <td className="text-end fw-semibold">${(item.value * item.quantity).toLocaleString("es-AR")}</td>
+                  <td className="text-end">
+                    ${item.value.toLocaleString("es-AR")}
+                  </td>
+                  <td className="text-end fw-semibold">
+                    ${(item.value * item.quantity).toLocaleString("es-AR")}
+                  </td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={3} className="text-end fw-bold">TOTAL</td>
-                <td className="text-end fw-bold fs-5" style={{ color: "var(--color-accent)" }}>
+                <td colSpan={3} className="text-end fw-bold">
+                  TOTAL
+                </td>
+                <td
+                  className="text-end fw-bold fs-5"
+                  style={{ color: "var(--color-accent)" }}
+                >
                   ${receiptTotal.toLocaleString("es-AR")}
                 </td>
               </tr>
@@ -299,13 +409,17 @@ function Cart() {
           </Table>
 
           <p className="text-muted small text-center mb-0">
-            Podés hacer seguimiento de tu pedido desde tu cuenta. El estado inicial es <strong>PENDIENTE</strong>.
+            Podés hacer seguimiento de tu pedido desde tu cuenta. El estado
+            inicial es <strong>PENDIENTE</strong>.
           </p>
         </Modal.Body>
         <Modal.Footer>
           <Button
             style={{ backgroundColor: "var(--color-accent)", border: "none" }}
-            onClick={() => { setShowReceipt(false); navigate("/"); }}
+            onClick={() => {
+              setShowReceipt(false);
+              navigate("/");
+            }}
           >
             Volver al inicio
           </Button>

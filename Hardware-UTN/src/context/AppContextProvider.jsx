@@ -1,24 +1,29 @@
 import { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 import { AppContext } from "./AppContext";
+import { BASE_URL, TOKEN_KEY } from "../services/apiConfig";
+import { isTokenValid } from "../services/auth/auth.helpers";
 
-const STORAGE_KEY = "hardware-utn-user";
 const LOGIN_DRAFT_KEY = "login_draft_email";
 
-const getStoredUser = () => {
+const getUserFromToken = () => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (!isTokenValid(token)) return null;
   try {
-    const stored = sessionStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : null;
+    return jwtDecode(token);
   } catch {
     return null;
   }
 };
 
 export const AppContextProvider = ({ children }) => {
-  const storedUser = getStoredUser();
+  const storedUser = getUserFromToken();
 
   const [isLoggedIn, setIsLoggedIn] = useState(!!storedUser);
   const [isAdmin, setIsAdmin] = useState(storedUser?.rol === "admin");
-  const [isSuperAdmin, setIsSuperAdmin] = useState(storedUser?.rol === "superAdmin");
+  const [isSuperAdmin, setIsSuperAdmin] = useState(
+    storedUser?.rol === "superAdmin",
+  );
   const [currentUser, setCurrentUser] = useState(storedUser);
   const [cart, setCart] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
@@ -27,19 +32,26 @@ export const AppContextProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:3000/items")
+    if (!isTokenValid(localStorage.getItem(TOKEN_KEY))) {
+      localStorage.removeItem(TOKEN_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/items`)
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => console.log(err));
   }, []);
 
-  useEffect(() => {
-    if (currentUser) {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
-    } else {
-      sessionStorage.removeItem(STORAGE_KEY);
-    }
-  }, [currentUser]);
+  const handleUserLogin = (token) => {
+    localStorage.setItem(TOKEN_KEY, token);
+    const decoded = jwtDecode(token);
+    setCurrentUser(decoded);
+    setIsLoggedIn(true);
+    setIsAdmin(decoded.rol === "admin");
+    setIsSuperAdmin(decoded.rol === "superAdmin");
+  };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
@@ -47,6 +59,7 @@ export const AppContextProvider = ({ children }) => {
     setIsSuperAdmin(false);
     setCurrentUser(null);
     setCart([]);
+    localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(LOGIN_DRAFT_KEY);
   };
 
@@ -71,6 +84,7 @@ export const AppContextProvider = ({ children }) => {
         setRegisterEmail,
         products,
         setProducts,
+        handleUserLogin,
         handleLogout,
       }}
     >

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Table, Button, Modal, Form, Badge } from "react-bootstrap";
 import { useAppContext } from "../../../context/AppContext";
+import { BASE_URL, getAuthHeaders } from "../../../services/apiConfig";
+import { errorToast, successToast } from "../../../services/notifications";
 
 const emptyForm = {
   firstName: "",
@@ -21,7 +23,7 @@ function UsuariosAdmin() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:3000/users")
+    fetch(`${BASE_URL}/users`, { headers: getAuthHeaders() })
       .then((res) => res.json())
       .then((data) => setUsers(data))
       .catch((err) => console.log(err));
@@ -31,7 +33,7 @@ function UsuariosAdmin() {
     (u) =>
       u.firstName?.toLowerCase().includes(search.toLowerCase()) ||
       u.lastName?.toLowerCase().includes(search.toLowerCase()) ||
-      u.mailAdress?.toLowerCase().includes(search.toLowerCase())
+      u.mailAdress?.toLowerCase().includes(search.toLowerCase()),
   );
 
   const openAdd = () => {
@@ -54,7 +56,12 @@ function UsuariosAdmin() {
   };
 
   const handleSave = async () => {
-    if (!form.firstName.trim() || !form.lastName.trim() || !form.mailAdress.trim()) return;
+    if (
+      !form.firstName.trim() ||
+      !form.lastName.trim() ||
+      !form.mailAdress.trim()
+    )
+      return;
 
     const body = {
       firstName: form.firstName,
@@ -65,35 +72,67 @@ function UsuariosAdmin() {
       ...(isSuperAdmin && { rol: form.rol }),
     };
 
-    if (editingUser) {
-      const res = await fetch(`http://localhost:3000/users/${editingUser.userId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const updated = await res.json();
-      setUsers(users.map((u) => (u.userId === editingUser.userId ? updated : u)));
-    } else {
-      const res = await fetch("http://localhost:3000/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...body, password: form.password }),
-      });
-      const created = await res.json();
-      setUsers([...users, created]);
+    try {
+      if (editingUser) {
+        const res = await fetch(`${BASE_URL}/users/${editingUser.userId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.message || "No se pudo editar el usuario.");
+        }
+        const updated = await res.json();
+        setUsers(
+          users.map((u) => (u.userId === editingUser.userId ? updated : u)),
+        );
+        successToast("Usuario editado correctamente.");
+      } else {
+        const res = await fetch(`${BASE_URL}/users`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+          body: JSON.stringify({ ...body, password: form.password }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.message || "No se pudo crear el usuario.");
+        }
+        const created = await res.json();
+        setUsers([...users, created]);
+        successToast("Usuario agregado correctamente.");
+      }
+      setShowModal(false);
+    } catch (err) {
+      errorToast(err.message);
     }
-    setShowModal(false);
   };
 
   const handleDelete = async (userId) => {
-    await fetch(`http://localhost:3000/users/${userId}`, { method: "DELETE" });
-    setUsers(users.filter((u) => u.userId !== userId));
-    setShowDeleteConfirm(null);
+    try {
+      const res = await fetch(`${BASE_URL}/users/${userId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error("No se pudo eliminar el usuario.");
+      setUsers(users.filter((u) => u.userId !== userId));
+      successToast("Usuario eliminado correctamente.");
+    } catch (err) {
+      errorToast(err.message);
+    } finally {
+      setShowDeleteConfirm(null);
+    }
   };
 
   const getRolBadge = (user) => {
-    if (user.rol === "superAdmin") return <Badge bg="danger">Super Admin</Badge>;
-    if (user.rol === "admin") return <Badge bg="warning" text="dark">Admin</Badge>;
+    if (user.rol === "superAdmin")
+      return <Badge bg="danger">Super Admin</Badge>;
+    if (user.rol === "admin")
+      return (
+        <Badge bg="warning" text="dark">
+          Admin
+        </Badge>
+      );
     return <Badge bg="secondary">Usuario</Badge>;
   };
 
@@ -109,7 +148,11 @@ function UsuariosAdmin() {
           style={{ maxWidth: "300px" }}
         />
         <Button
-          style={{ backgroundColor: "var(--color-accent)", border: "none", flexShrink: 0 }}
+          style={{
+            backgroundColor: "var(--color-accent)",
+            border: "none",
+            flexShrink: 0,
+          }}
           onClick={openAdd}
         >
           + Agregar usuario
@@ -117,7 +160,9 @@ function UsuariosAdmin() {
       </div>
 
       <Table responsive hover className="shadow-sm">
-        <thead style={{ backgroundColor: "var(--color-header)", color: "white" }}>
+        <thead
+          style={{ backgroundColor: "var(--color-header)", color: "white" }}
+        >
           <tr>
             <th style={{ width: "60px" }}>#</th>
             <th>Nombre</th>
@@ -130,22 +175,40 @@ function UsuariosAdmin() {
         <tbody>
           {filteredUsers.map((u) => (
             <tr key={u.userId} className="align-middle">
-              <td><Badge bg="secondary">{u.userId}</Badge></td>
-              <td className="fw-semibold">{u.firstName} {u.lastName}</td>
+              <td>
+                <Badge bg="secondary">{u.userId}</Badge>
+              </td>
+              <td className="fw-semibold">
+                {u.firstName} {u.lastName}
+              </td>
               <td>{u.userName}</td>
               <td>{u.mailAdress}</td>
               <td>{getRolBadge(u)}</td>
               <td className="text-center">
                 <div className="d-flex gap-2 justify-content-center">
-                  <Button size="sm" variant="outline-primary" onClick={() => openEdit(u)}>Editar</Button>
-                  <Button size="sm" variant="outline-danger" onClick={() => setShowDeleteConfirm(u.userId)}>Eliminar</Button>
+                  <Button
+                    size="sm"
+                    variant="outline-primary"
+                    onClick={() => openEdit(u)}
+                  >
+                    Editar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline-danger"
+                    onClick={() => setShowDeleteConfirm(u.userId)}
+                  >
+                    Eliminar
+                  </Button>
                 </div>
               </td>
             </tr>
           ))}
           {filteredUsers.length === 0 && (
             <tr>
-              <td colSpan={6} className="text-center text-muted py-4">No hay usuarios.</td>
+              <td colSpan={6} className="text-center text-muted py-4">
+                No hay usuarios.
+              </td>
             </tr>
           )}
         </tbody>
@@ -165,14 +228,18 @@ function UsuariosAdmin() {
                 <Form.Label className="fw-semibold">Nombre</Form.Label>
                 <Form.Control
                   value={form.firstName}
-                  onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, firstName: e.target.value })
+                  }
                 />
               </Form.Group>
               <Form.Group className="mb-3 col-6">
                 <Form.Label className="fw-semibold">Apellido</Form.Label>
                 <Form.Control
                   value={form.lastName}
-                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, lastName: e.target.value })
+                  }
                 />
               </Form.Group>
             </div>
@@ -188,12 +255,16 @@ function UsuariosAdmin() {
               <Form.Control
                 type="email"
                 value={form.mailAdress}
-                onChange={(e) => setForm({ ...form, mailAdress: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, mailAdress: e.target.value })
+                }
               />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label className="fw-semibold">
-                {editingUser ? "Nueva contraseña (dejar vacío para no cambiar)" : "Contraseña"}
+                {editingUser
+                  ? "Nueva contraseña (dejar vacío para no cambiar)"
+                  : "Contraseña"}
               </Form.Label>
               <Form.Control
                 type="password"
@@ -217,7 +288,12 @@ function UsuariosAdmin() {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-secondary" onClick={() => setShowModal(false)}>Cancelar</Button>
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowModal(false)}
+          >
+            Cancelar
+          </Button>
           <Button
             style={{ backgroundColor: "var(--color-accent)", border: "none" }}
             onClick={handleSave}
@@ -234,7 +310,11 @@ function UsuariosAdmin() {
       </Modal>
 
       {/* Modal confirmar eliminación */}
-      <Modal show={showDeleteConfirm !== null} onHide={() => setShowDeleteConfirm(null)} centered>
+      <Modal
+        show={showDeleteConfirm !== null}
+        onHide={() => setShowDeleteConfirm(null)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold">Confirmar eliminación</Modal.Title>
         </Modal.Header>
@@ -247,8 +327,18 @@ function UsuariosAdmin() {
           ? Esta acción no se puede deshacer.
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-secondary" onClick={() => setShowDeleteConfirm(null)}>Cancelar</Button>
-          <Button variant="danger" onClick={() => handleDelete(showDeleteConfirm)}>Eliminar</Button>
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowDeleteConfirm(null)}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => handleDelete(showDeleteConfirm)}
+          >
+            Eliminar
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>

@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import { useAppContext } from "./context/AppContext";
 import Terminos from "./components/terminos/Terminos";
@@ -25,20 +27,13 @@ function App() {
     setShowRegister,
     registerEmail,
     setRegisterEmail,
-    setIsLoggedIn,
-    setIsAdmin,
-    setIsSuperAdmin,
-    setCurrentUser,
   } = useAppContext();
 
   return (
     <BrowserRouter>
+      <ToastContainer />
       {showLogin && (
         <Login
-          setIsLoggedIn={setIsLoggedIn}
-          setIsAdmin={setIsAdmin}
-          setIsSuperAdmin={setIsSuperAdmin}
-          setCurrentUser={setCurrentUser}
           onClose={() => setShowLogin(false)}
           onSwitchToRegister={(email = "") => {
             setRegisterEmail(email);
@@ -81,7 +76,11 @@ function App() {
         <Route
           path="/admin"
           element={
-            isAdmin || isSuperAdmin ? <AdminPanel /> : <Navigate to="/" replace />
+            isAdmin || isSuperAdmin ? (
+              <AdminPanel />
+            ) : (
+              <Navigate to="/" replace />
+            )
           }
         />
         <Route path="/como-comprar" element={<ComoComprar />} />
