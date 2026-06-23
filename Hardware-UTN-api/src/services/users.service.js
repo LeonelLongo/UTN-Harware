@@ -1,4 +1,6 @@
+import jwt from "jsonwebtoken";
 import { Users } from "../Models/users.js";
+import { JWT_SECRET } from "../config.js";
 
 export const getAllUsers = async (req, res) => {
   const { email } = req.query;
@@ -56,5 +58,6 @@ export const loginUser = async (req, res) => {
     return res.status(401).json({ message: "Contraseña incorrecta" });
 
   const { password: _, ...userData } = user.toJSON();
-  res.json(userData);
+  const token = jwt.sign(userData, JWT_SECRET, { expiresIn: "7d" });
+  res.json(token);
 };

@@ -55,34 +55,44 @@ const arrowStyle = (side) => ({
 function Home() {
   const navigate = useNavigate();
   const { products, cart, setCart } = useAppContext();
-  const ofertaRef = useRef(null);
-  const [wrapperWidth, setWrapperWidth] = useState(0);
-  const [slideIdx, setSlideIdx] = useState(0);
 
-  const novedades = [...products].slice(-4).reverse();
+  const novedadRef = useRef(null);
+  const [novedadWidth, setNovedadWidth] = useState(0);
+  const [novedadSlide, setNovedadSlide] = useState(0);
+
+  const ofertaRef = useRef(null);
+  const [ofertaWidth, setOfertaWidth] = useState(0);
+  const [ofertaSlide, setOfertaSlide] = useState(0);
+
+  const novedades = [...products].slice(-8).reverse();
   const ofertas = products.filter((p) => p.isOffer);
 
-  useEffect(() => {
-    setSlideIdx(0);
-  }, [ofertas.length]);
+  useEffect(() => { setNovedadSlide(0); }, [novedades.length]);
+  useEffect(() => { setOfertaSlide(0); }, [ofertas.length]);
 
   useEffect(() => {
-    const el = ofertaRef.current;
+    const el = novedadRef.current;
     if (!el) return;
-    const ro = new ResizeObserver((entries) =>
-      setWrapperWidth(entries[0].contentRect.width),
-    );
+    const ro = new ResizeObserver((entries) => setNovedadWidth(entries[0].contentRect.width));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
-  const itemWidth =
-    wrapperWidth > 0
-      ? (wrapperWidth - 2 * PEEK - (N_VISIBLE - 1) * GAP) / N_VISIBLE
-      : 180;
-  const shiftPerSlide = itemWidth + GAP;
-  const maxSlide = Math.max(0, ofertas.length - N_VISIBLE);
-  const translateX = PEEK - slideIdx * shiftPerSlide;
+  useEffect(() => {
+    const el = ofertaRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => setOfertaWidth(entries[0].contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const novedadItemWidth = novedadWidth > 0 ? (novedadWidth - 2 * PEEK - (N_VISIBLE - 1) * GAP) / N_VISIBLE : 180;
+  const novedadMaxSlide = Math.max(0, novedades.length - N_VISIBLE);
+  const novedadTranslateX = PEEK - novedadSlide * (novedadItemWidth + GAP);
+
+  const ofertaItemWidth = ofertaWidth > 0 ? (ofertaWidth - 2 * PEEK - (N_VISIBLE - 1) * GAP) / N_VISIBLE : 180;
+  const ofertaMaxSlide = Math.max(0, ofertas.length - N_VISIBLE);
+  const ofertaTranslateX = PEEK - ofertaSlide * (ofertaItemWidth + GAP);
 
   const getQuantity = (id) => cart.find((p) => p.id === id)?.quantity ?? 0;
 
@@ -136,34 +146,38 @@ function Home() {
       <section style={{ marginBottom: "40px" }}>
         <h4 style={sectionTitle}>Novedades</h4>
         {novedades.length > 0 ? (
-          <div style={productGrid}>
-            {novedades.map((p) => (
-              <ProductItem
-                key={p.id}
-                id={p.id}
-                name={p.title}
-                price={p.value}
-                image={p.imageUrl}
-                quantityInCart={getQuantity(p.id)}
-                onAdd={() => handleAdd(p)}
-                onRemove={() => handleRemove(p)}
-                isNew={true}
-              />
-            ))}
-          </div>
+          novedades.length > N_VISIBLE ? (
+            <div style={{ position: "relative", padding: "0 44px" }}>
+              <button
+                onClick={() => setNovedadSlide((i) => Math.max(0, i - 1))}
+                style={{ ...arrowStyle("left"), opacity: novedadSlide > 0 ? 1 : 0, pointerEvents: novedadSlide > 0 ? "auto" : "none" }}
+              >‹</button>
+              <button
+                onClick={() => setNovedadSlide((i) => Math.min(novedadMaxSlide, i + 1))}
+                style={{ ...arrowStyle("right"), opacity: novedadSlide < novedadMaxSlide ? 1 : 0, pointerEvents: novedadSlide < novedadMaxSlide ? "auto" : "none" }}
+              >›</button>
+              <div ref={novedadRef} style={{ overflow: "hidden", opacity: novedadWidth > 0 ? 1 : 0 }}>
+                <div style={{ display: "flex", gap: `${GAP}px`, transform: `translateX(${novedadTranslateX}px)`, transition: "transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)", willChange: "transform", padding: "8px 0" }}>
+                  {novedades.map((p, i) => {
+                    const inView = i >= novedadSlide && i < novedadSlide + N_VISIBLE;
+                    return (
+                      <div key={p.id} style={{ width: `${novedadItemWidth}px`, flexShrink: 0, opacity: inView ? 1 : 0.3, transition: "opacity 0.4s ease", pointerEvents: inView ? "auto" : "none" }}>
+                        <ProductItem id={p.id} name={p.title} price={p.value} image={p.imageUrl} quantityInCart={getQuantity(p.id)} onAdd={() => handleAdd(p)} onRemove={() => handleRemove(p)} isNew={true} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div style={productGrid}>
+              {novedades.map((p) => (
+                <ProductItem key={p.id} id={p.id} name={p.title} price={p.value} image={p.imageUrl} quantityInCart={getQuantity(p.id)} onAdd={() => handleAdd(p)} onRemove={() => handleRemove(p)} isNew={true} />
+              ))}
+            </div>
+          )
         ) : (
-          <div
-            style={{
-              minHeight: "180px",
-              backgroundColor: "#f8f8f8",
-              borderRadius: "var(--border-radius)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#bbb",
-              border: "1px dashed #ddd",
-            }}
-          >
+          <div style={{ minHeight: "180px", backgroundColor: "#f8f8f8", borderRadius: "var(--border-radius)", display: "flex", alignItems: "center", justifyContent: "center", color: "#bbb", border: "1px dashed #ddd" }}>
             Próximamente
           </div>
         )}
@@ -175,68 +189,20 @@ function Home() {
           ofertas.length > N_VISIBLE ? (
             <div style={{ position: "relative", padding: "0 44px" }}>
               <button
-                onClick={() => setSlideIdx((i) => Math.max(0, i - 1))}
-                style={{
-                  ...arrowStyle("left"),
-                  opacity: slideIdx > 0 ? 1 : 0,
-                  pointerEvents: slideIdx > 0 ? "auto" : "none",
-                }}
-              >
-                ‹
-              </button>
-
+                onClick={() => setOfertaSlide((i) => Math.max(0, i - 1))}
+                style={{ ...arrowStyle("left"), opacity: ofertaSlide > 0 ? 1 : 0, pointerEvents: ofertaSlide > 0 ? "auto" : "none" }}
+              >‹</button>
               <button
-                onClick={() => setSlideIdx((i) => Math.min(maxSlide, i + 1))}
-                style={{
-                  ...arrowStyle("right"),
-                  opacity: slideIdx < maxSlide ? 1 : 0,
-                  pointerEvents: slideIdx < maxSlide ? "auto" : "none",
-                }}
-              >
-                ›
-              </button>
-
-              <div
-                ref={ofertaRef}
-                style={{
-                  overflow: "hidden",
-                  opacity: wrapperWidth > 0 ? 1 : 0,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    gap: `${GAP}px`,
-                    transform: `translateX(${translateX}px)`,
-                    transition:
-                      "transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)",
-                    willChange: "transform",
-                    padding: "8px 0",
-                  }}
-                >
+                onClick={() => setOfertaSlide((i) => Math.min(ofertaMaxSlide, i + 1))}
+                style={{ ...arrowStyle("right"), opacity: ofertaSlide < ofertaMaxSlide ? 1 : 0, pointerEvents: ofertaSlide < ofertaMaxSlide ? "auto" : "none" }}
+              >›</button>
+              <div ref={ofertaRef} style={{ overflow: "hidden", opacity: ofertaWidth > 0 ? 1 : 0 }}>
+                <div style={{ display: "flex", gap: `${GAP}px`, transform: `translateX(${ofertaTranslateX}px)`, transition: "transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)", willChange: "transform", padding: "8px 0" }}>
                   {ofertas.map((p, i) => {
-                    const inView = i >= slideIdx && i < slideIdx + N_VISIBLE;
+                    const inView = i >= ofertaSlide && i < ofertaSlide + N_VISIBLE;
                     return (
-                      <div
-                        key={p.id}
-                        style={{
-                          width: `${itemWidth}px`,
-                          flexShrink: 0,
-                          opacity: inView ? 1 : 0.3,
-                          transition: "opacity 0.4s ease",
-                          pointerEvents: inView ? "auto" : "none",
-                        }}
-                      >
-                        <ProductItem
-                          id={p.id}
-                          name={p.title}
-                          price={p.value}
-                          image={p.imageUrl}
-                          quantityInCart={getQuantity(p.id)}
-                          onAdd={() => handleAdd(p)}
-                          onRemove={() => handleRemove(p)}
-                          discount={20}
-                        />
+                      <div key={p.id} style={{ width: `${ofertaItemWidth}px`, flexShrink: 0, opacity: inView ? 1 : 0.3, transition: "opacity 0.4s ease", pointerEvents: inView ? "auto" : "none" }}>
+                        <ProductItem id={p.id} name={p.title} price={p.value} image={p.imageUrl} quantityInCart={getQuantity(p.id)} onAdd={() => handleAdd(p)} onRemove={() => handleRemove(p)} discount={20} />
                       </div>
                     );
                   })}

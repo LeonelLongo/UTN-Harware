@@ -5,11 +5,12 @@ Columba Fabricio - Longo Leonel - Auzmendi Tobias
 Dependencias utilizadas:
 - FrontEnd
     * Vite
-    * Boostrap
+    * Bootstrap
     * React-Icons
 
 - BackEnd
     * Express
     * Sqlite3
     * Morgan
-    * sequelize
+    * Sequelize
+    * Jsonwebtoken
