@@ -7,9 +7,29 @@ import { errorToast, successToast } from "../../../services/notifications";
 const CATEGORIES = [
   "Periféricos",
   "Componentes",
-  "Almacenamiento",
   "Accesorios",
 ];
+
+const specsToText = (specsJson) => {
+  if (!specsJson) return "";
+  try {
+    const obj = typeof specsJson === "string" ? JSON.parse(specsJson) : specsJson;
+    return Object.entries(obj).map(([k, v]) => `${k}: ${v}`).join("\n");
+  } catch { return ""; }
+};
+
+const textToSpecs = (text) => {
+  if (!text.trim()) return null;
+  const obj = {};
+  text.split("\n").forEach((line) => {
+    const idx = line.indexOf(":");
+    if (idx === -1) return;
+    const key = line.slice(0, idx).trim();
+    const val = line.slice(idx + 1).trim();
+    if (key) obj[key] = val;
+  });
+  return Object.keys(obj).length ? JSON.stringify(obj) : null;
+};
 
 const emptyForm = {
   title: "",
@@ -19,6 +39,7 @@ const emptyForm = {
   category: "",
   subCategory: "",
   isOffer: false,
+  specs: "",
 };
 
 function ProductosAdmin() {
@@ -49,6 +70,7 @@ function ProductosAdmin() {
       category: product.category || "",
       subCategory: product.subCategory || "",
       isOffer: product.isOffer || false,
+      specs: specsToText(product.specs),
     });
     setShowModal(true);
   };
@@ -79,6 +101,7 @@ function ProductosAdmin() {
       category: form.category,
       subCategory: form.subCategory,
       isOffer: form.isOffer,
+      specs: textToSpecs(form.specs),
     };
 
     try {
@@ -320,6 +343,17 @@ function ProductosAdmin() {
                 value={form.summary}
                 onChange={(e) => setForm({ ...form, summary: e.target.value })}
               />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Especificaciones</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                placeholder={"Procesador: Intel i9\nRAM: 32GB DDR5\nAlmacenamiento: 1TB SSD"}
+                value={form.specs}
+                onChange={(e) => setForm({ ...form, specs: e.target.value })}
+              />
+              <Form.Text className="text-muted">Una por línea, formato: <code>Clave: Valor</code></Form.Text>
             </Form.Group>
             <Form.Check
               type="switch"

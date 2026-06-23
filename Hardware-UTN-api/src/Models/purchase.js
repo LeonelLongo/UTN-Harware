@@ -10,7 +10,7 @@ export const Purchase = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    product: { type: DataTypes.STRING, allowNull: false },
+    items: { type: DataTypes.TEXT, allowNull: false },
     quantity: { type: DataTypes.INTEGER, allowNull: false },
     price: { type: DataTypes.FLOAT, allowNull: false },
     purchaseDate: {

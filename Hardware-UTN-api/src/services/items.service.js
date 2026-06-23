@@ -26,6 +26,7 @@ export const createItem = async (req, res) => {
     subCategory,
     stock,
     isOffer,
+    specs,
   } = req.body;
 
   if (!title) {
@@ -44,6 +45,7 @@ export const createItem = async (req, res) => {
     subCategory,
     stock,
     isOffer,
+    specs,
   });
   res.json(newItem);
 };
@@ -62,6 +64,7 @@ export const updateItem = async (req, res) => {
     subCategory,
     stock,
     isOffer,
+    specs,
   } = req.body;
   const item = await Item.findByPk(id);
 
@@ -77,6 +80,7 @@ export const updateItem = async (req, res) => {
     subCategory,
     stock,
     isOffer,
+    specs,
   });
 
   await item.save();

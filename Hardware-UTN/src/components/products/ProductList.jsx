@@ -23,6 +23,7 @@ function ProductList({ products, onAdd, onRemove, cart = [], ofertaIds = new Set
             onRemove={() => onRemove(product)}
             quantityInCart={getQty(product.id)}
             discount={ofertaIds.has(product.id) ? 20 : 0}
+            stock={product.stock}
           />
         </Col>
       ))}

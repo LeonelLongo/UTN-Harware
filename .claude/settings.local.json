@@ -13,7 +13,11 @@
       "Bash(netstat -ano)",
       "Bash(findstr :3000)",
       "Bash(tasklist /FI \"PID eq 20348\")",
-      "PowerShell(Get-Process -Id 20348)"
+      "PowerShell(Get-Process -Id 20348)",
+      "Bash(curl -s http://localhost:3000/items)",
+      "Bash(python3 -c \"import sys,json; items=json.load\\(sys.stdin\\); [print\\(f'{i[\\\\\"id\\\\\"]}|{i[\\\\\"title\\\\\"]}|{i.get\\(\\\\\"subCategory\\\\\",\\\\\"\\\\\"\\)}|{i.get\\(\\\\\"category\\\\\",\\\\\"\\\\\"\\)}'\\) for i in items]\")",
+      "PowerShell(\\(Invoke-RestMethod -Uri \"http://localhost:3000/items\" -Method GET\\) | Select-Object id, title, subCategory, category | Format-Table)",
+      "PowerShell(node \"C:\\\\Users\\\\longo\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-longo-OneDrive-Escritorio-Programaci-n-3\\\\e3360f88-0707-4dd0-8730-8db1cf87e743\\\\scratchpad\\\\add-specs.js\")"
     ]
   }
 }

@@ -24,15 +24,16 @@ export const getPurchaseById = async (req, res) => {
 };
 
 export const createPurchase = async (req, res) => {
-  const { userId, product, quantity, price, purchaseDate, status } = req.body;
-  if (!userId || !product || !quantity || !price)
+  const { userId, items, price, purchaseDate, status } = req.body;
+  if (!userId || !items || !price)
     return res
       .status(400)
-      .json({ message: "userId, product, quantity y price son requeridos" });
+      .json({ message: "userId, items y price son requeridos" });
+  const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
   const purchase = await Purchase.create({
     userId,
-    product,
-    quantity,
+    items: JSON.stringify(items),
+    quantity: totalQuantity,
     price,
     purchaseDate,
     status,

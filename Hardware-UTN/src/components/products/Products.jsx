@@ -8,7 +8,6 @@ import { useAppContext } from "../../context/AppContext";
 const CATEGORIES = [
   "Periféricos",
   "Componentes",
-  "Almacenamiento",
   "Accesorios",
 ];
 
@@ -27,7 +26,7 @@ function Products() {
     const matchesCategory =
       selectedCategory === "Todas" || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
-  });
+  }).sort((a, b) => (a.stock === 0 ? 1 : 0) - (b.stock === 0 ? 1 : 0));
 
   const ofertaIds = new Set(products.filter((p) => p.isOffer).map((p) => p.id));
 

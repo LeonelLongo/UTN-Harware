@@ -1,16 +1,43 @@
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-function ProductItem({ id, name, price, image, onAdd, onRemove, quantityInCart = 0, isNew = false, discount = 0 }) {
+function ProductItem({ id, name, price, image, onAdd, onRemove, quantityInCart = 0, isNew = false, discount = 0, stock }) {
   const navigate = useNavigate();
   const discountedPrice = discount > 0 ? Math.round(price * (1 - discount / 100) * 100) / 100 : null;
+  const sinStock = stock === 0;
 
   return (
     <Card
       className="h-100 product-card"
-      style={{ cursor: "pointer", position: "relative" }}
+      style={{ cursor: "pointer", position: "relative", opacity: sinStock ? 0.6 : 1 }}
       onClick={() => navigate(`/producto/${id}`)}
     >
+      {sinStock && (
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: "rgba(255,255,255,0.55)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 3,
+          borderRadius: "inherit",
+          pointerEvents: "none",
+        }}>
+          <span style={{
+            backgroundColor: "rgba(0,0,0,0.72)",
+            color: "white",
+            fontWeight: 700,
+            fontSize: "0.95rem",
+            padding: "6px 18px",
+            borderRadius: "4px",
+            letterSpacing: "0.1em",
+          }}>
+            SIN STOCK
+          </span>
+        </div>
+      )}
+
       {isNew && (
         <div style={{
           position: "absolute",
@@ -89,7 +116,11 @@ function ProductItem({ id, name, price, image, onAdd, onRemove, quantityInCart =
           </span>
         )}
 
-        {quantityInCart > 0 ? (
+        {sinStock ? (
+          <Button className="mt-3 w-100 fw-semibold" disabled style={{ border: "none" }}>
+            Sin stock
+          </Button>
+        ) : quantityInCart > 0 ? (
           <div
             className="mt-3 d-flex align-items-center justify-content-between"
             onClick={(e) => e.stopPropagation()}

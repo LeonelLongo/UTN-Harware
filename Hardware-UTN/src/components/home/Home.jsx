@@ -64,7 +64,7 @@ function Home() {
   const [ofertaWidth, setOfertaWidth] = useState(0);
   const [ofertaSlide, setOfertaSlide] = useState(0);
 
-  const novedades = [...products].slice(-8).reverse();
+  const novedades = [...products].filter(p => !/ram/i.test(p.subCategory ?? "") && !/ram/i.test(p.title)).slice(-8).reverse();
   const ofertas = products.filter((p) => p.isOffer);
 
   useEffect(() => { setNovedadSlide(0); }, [novedades.length]);
@@ -76,7 +76,7 @@ function Home() {
     const ro = new ResizeObserver((entries) => setNovedadWidth(entries[0].contentRect.width));
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [novedades.length]);
 
   useEffect(() => {
     const el = ofertaRef.current;
@@ -84,7 +84,7 @@ function Home() {
     const ro = new ResizeObserver((entries) => setOfertaWidth(entries[0].contentRect.width));
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [ofertas.length]);
 
   const novedadItemWidth = novedadWidth > 0 ? (novedadWidth - 2 * PEEK - (N_VISIBLE - 1) * GAP) / N_VISIBLE : 180;
   const novedadMaxSlide = Math.max(0, novedades.length - N_VISIBLE);
@@ -162,7 +162,7 @@ function Home() {
                     const inView = i >= novedadSlide && i < novedadSlide + N_VISIBLE;
                     return (
                       <div key={p.id} style={{ width: `${novedadItemWidth}px`, flexShrink: 0, opacity: inView ? 1 : 0.3, transition: "opacity 0.4s ease", pointerEvents: inView ? "auto" : "none" }}>
-                        <ProductItem id={p.id} name={p.title} price={p.value} image={p.imageUrl} quantityInCart={getQuantity(p.id)} onAdd={() => handleAdd(p)} onRemove={() => handleRemove(p)} isNew={true} />
+                        <ProductItem id={p.id} name={p.title} price={p.value} image={p.imageUrl} quantityInCart={getQuantity(p.id)} onAdd={() => handleAdd(p)} onRemove={() => handleRemove(p)} isNew={true} stock={p.stock} />
                       </div>
                     );
                   })}
@@ -172,7 +172,7 @@ function Home() {
           ) : (
             <div style={productGrid}>
               {novedades.map((p) => (
-                <ProductItem key={p.id} id={p.id} name={p.title} price={p.value} image={p.imageUrl} quantityInCart={getQuantity(p.id)} onAdd={() => handleAdd(p)} onRemove={() => handleRemove(p)} isNew={true} />
+                <ProductItem key={p.id} id={p.id} name={p.title} price={p.value} image={p.imageUrl} quantityInCart={getQuantity(p.id)} onAdd={() => handleAdd(p)} onRemove={() => handleRemove(p)} isNew={true} stock={p.stock} />
               ))}
             </div>
           )
@@ -202,7 +202,7 @@ function Home() {
                     const inView = i >= ofertaSlide && i < ofertaSlide + N_VISIBLE;
                     return (
                       <div key={p.id} style={{ width: `${ofertaItemWidth}px`, flexShrink: 0, opacity: inView ? 1 : 0.3, transition: "opacity 0.4s ease", pointerEvents: inView ? "auto" : "none" }}>
-                        <ProductItem id={p.id} name={p.title} price={p.value} image={p.imageUrl} quantityInCart={getQuantity(p.id)} onAdd={() => handleAdd(p)} onRemove={() => handleRemove(p)} discount={20} />
+                        <ProductItem id={p.id} name={p.title} price={p.value} image={p.imageUrl} quantityInCart={getQuantity(p.id)} onAdd={() => handleAdd(p)} onRemove={() => handleRemove(p)} discount={20} stock={p.stock} />
                       </div>
                     );
                   })}
@@ -222,6 +222,7 @@ function Home() {
                   onAdd={() => handleAdd(p)}
                   onRemove={() => handleRemove(p)}
                   discount={20}
+                  stock={p.stock}
                 />
               ))}
             </div>

@@ -64,21 +64,14 @@ function ProductDetail() {
   };
 
   const quantityInCart = cart.find((p) => p.id === product.id)?.quantity ?? 0;
+  const hasSummary = product.summary && product.summary.trim().length > 0;
+  const discountPct = product.isOffer ? 20 : null;
   const parsedSpecs = (() => {
     if (!product.specs) return null;
-    if (typeof product.specs === "object") return product.specs;
-    try {
-      return JSON.parse(product.specs);
-    } catch {
-      return null;
-    }
+    try { return JSON.parse(product.specs); } catch { return null; }
   })();
   const hasSpecs = parsedSpecs && Object.keys(parsedSpecs).length > 0;
-  const hasSummary = product.summary && product.summary.trim().length > 0;
-  const discountPct =
-    product.isOffer && product.originalPrice
-      ? Math.round((1 - product.value / product.originalPrice) * 100)
-      : null;
+  const discountedPrice = discountPct ? Math.round(product.value * (1 - discountPct / 100) * 100) / 100 : null;
 
   return (
     <Layout>
@@ -134,19 +127,7 @@ function ProductDetail() {
               }}
             >
               {discountPct && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "12px",
-                    left: "12px",
-                    backgroundColor: "#e53935",
-                    color: "white",
-                    padding: "4px 10px",
-                    borderRadius: "4px",
-                    fontSize: "0.8rem",
-                    fontWeight: 700,
-                  }}
-                >
+                <div style={{ position: "absolute", top: "12px", left: "12px", backgroundColor: "#e53935", color: "white", padding: "4px 10px", borderRadius: "4px", fontSize: "0.8rem", fontWeight: 700 }}>
                   -{discountPct}%
                 </div>
               )}
@@ -174,14 +155,18 @@ function ProductDetail() {
               }}
             >
               {product.category && (
-                <span
-                  style={{
-                    fontSize: "0.82rem",
-                    color: "var(--color-accent)",
-                    fontWeight: 600,
-                  }}
-                >
+                <span style={{ fontSize: "0.82rem", color: "var(--color-accent)", fontWeight: 600 }}>
                   {product.category}
+                </span>
+              )}
+              {product.subCategory && (
+                <span style={{ fontSize: "0.78rem", color: "#666", backgroundColor: "#f0f0f0", padding: "2px 8px", borderRadius: "4px" }}>
+                  {product.subCategory}
+                </span>
+              )}
+              {product.model && (
+                <span style={{ fontSize: "0.78rem", color: "#666", backgroundColor: "#f0f0f0", padding: "2px 8px", borderRadius: "4px" }}>
+                  {product.model}
                 </span>
               )}
             </div>
@@ -200,45 +185,10 @@ function ProductDetail() {
 
             {/* ID del producto */}
             <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
-              <span
-                style={{
-                  fontSize: "0.78rem",
-                  color: "var(--color-text-muted)",
-                  backgroundColor: "#f0f0f0",
-                  padding: "3px 10px",
-                  borderRadius: "4px",
-                }}
-              >
+              <span style={{ fontSize: "0.78rem", color: "var(--color-text-muted)", backgroundColor: "#f0f0f0", padding: "3px 10px", borderRadius: "4px" }}>
                 ID: {product.id}
               </span>
-              {product.sku && (
-                <span
-                  style={{
-                    fontSize: "0.78rem",
-                    color: "var(--color-text-muted)",
-                    backgroundColor: "#f0f0f0",
-                    padding: "3px 10px",
-                    borderRadius: "4px",
-                  }}
-                >
-                  SKU: {product.sku}
-                </span>
-              )}
             </div>
-
-            {/* Summary */}
-            {hasSummary && (
-              <p
-                style={{
-                  color: "var(--color-text-muted)",
-                  fontSize: "0.9rem",
-                  marginBottom: "16px",
-                  lineHeight: 1.6,
-                }}
-              >
-                {product.summary}
-              </p>
-            )}
 
             {/* Precio */}
             <div
@@ -250,78 +200,25 @@ function ProductDetail() {
                 border: "1px solid var(--color-border)",
               }}
             >
-              {discountPct ? (
+              {discountedPrice ? (
                 <>
-                  <div
-                    style={{
-                      fontSize: "0.82rem",
-                      color: "var(--color-accent)",
-                      fontWeight: 600,
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Mejor precio
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        textDecoration: "line-through",
-                        color: "#aaa",
-                        fontSize: "0.95rem",
-                      }}
-                    >
-                      ${product.originalPrice.toLocaleString("es-AR")}
+                  <div style={{ fontSize: "0.82rem", color: "var(--color-accent)", fontWeight: 600, marginBottom: "4px" }}>Mejor precio</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
+                    <span style={{ textDecoration: "line-through", color: "#aaa", fontSize: "0.95rem" }}>
+                      ${product.value.toLocaleString("es-AR")}
                     </span>
-                    <span
-                      style={{
-                        backgroundColor: "#e53935",
-                        color: "white",
-                        fontSize: "0.75rem",
-                        fontWeight: 700,
-                        padding: "2px 7px",
-                        borderRadius: "4px",
-                      }}
-                    >
+                    <span style={{ backgroundColor: "#e53935", color: "white", fontSize: "0.75rem", fontWeight: 700, padding: "2px 7px", borderRadius: "4px" }}>
                       -{discountPct}%
                     </span>
                   </div>
-                  <div
-                    style={{
-                      color: "var(--color-accent)",
-                      fontSize: "2rem",
-                      fontWeight: 800,
-                      lineHeight: 1,
-                    }}
-                  >
-                    ${product.value.toLocaleString("es-AR")}
+                  <div style={{ color: "var(--color-accent)", fontSize: "2rem", fontWeight: 800, lineHeight: 1 }}>
+                    ${discountedPrice.toLocaleString("es-AR")}
                   </div>
                 </>
               ) : (
                 <>
-                  <div
-                    style={{
-                      fontSize: "0.82rem",
-                      color: "var(--color-text-muted)",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Precio
-                  </div>
-                  <div
-                    style={{
-                      color: "var(--color-accent)",
-                      fontSize: "2rem",
-                      fontWeight: 800,
-                      lineHeight: 1,
-                    }}
-                  >
+                  <div style={{ fontSize: "0.82rem", color: "var(--color-text-muted)", marginBottom: "4px" }}>Precio</div>
+                  <div style={{ color: "var(--color-accent)", fontSize: "2rem", fontWeight: 800, lineHeight: 1 }}>
                     ${product.value.toLocaleString("es-AR")}
                   </div>
                 </>
@@ -343,11 +240,11 @@ function ProductDetail() {
                   alignItems: "center",
                   gap: "8px",
                   fontSize: "0.88rem",
-                  color: "var(--color-success, #2e7d32)",
+                  color: product.stock === 0 ? "#c62828" : "var(--color-success, #2e7d32)",
                 }}
               >
-                <span style={{ fontSize: "1rem" }}>✓</span>
-                <span style={{ fontWeight: 600 }}>Stock disponible</span>
+                <span style={{ fontSize: "1rem" }}>{product.stock === 0 ? "✕" : "✓"}</span>
+                <span style={{ fontWeight: 600 }}>{product.stock === 0 ? "Sin stock" : "Stock disponible"}</span>
               </div>
               <div
                 style={{
@@ -386,49 +283,33 @@ function ProductDetail() {
             </div>
 
             {/* Botón carrito */}
-            {quantityInCart > 0 ? (
+            {product.stock === 0 ? (
+              <Button
+                size="lg"
+                className="w-100 fw-semibold"
+                disabled
+                style={{ padding: "14px", fontSize: "1rem" }}
+              >
+                Sin stock
+              </Button>
+            ) : quantityInCart > 0 ? (
               <div
                 style={{ display: "flex", alignItems: "center", gap: "12px" }}
               >
                 <Button
                   variant="outline-secondary"
-                  style={{
-                    width: "48px",
-                    height: "48px",
-                    padding: 0,
-                    lineHeight: 1,
-                    fontSize: "1.4rem",
-                    flexShrink: 0,
-                  }}
+                  style={{ width: "48px", height: "48px", padding: 0, lineHeight: 1, fontSize: "1.4rem", flexShrink: 0 }}
                   onClick={handleRemoveFromCart}
                 >
                   −
                 </Button>
                 <div
-                  style={{
-                    flex: 1,
-                    textAlign: "center",
-                    backgroundColor: "var(--color-accent)",
-                    color: "white",
-                    borderRadius: "var(--border-radius)",
-                    padding: "13px",
-                    fontWeight: 600,
-                    fontSize: "1rem",
-                  }}
+                  style={{ flex: 1, textAlign: "center", backgroundColor: "var(--color-accent)", color: "white", borderRadius: "var(--border-radius)", padding: "13px", fontWeight: 600, fontSize: "1rem" }}
                 >
                   {quantityInCart} en carrito
                 </div>
                 <Button
-                  style={{
-                    width: "48px",
-                    height: "48px",
-                    padding: 0,
-                    lineHeight: 1,
-                    fontSize: "1.4rem",
-                    flexShrink: 0,
-                    backgroundColor: "var(--color-accent)",
-                    border: "none",
-                  }}
+                  style={{ width: "48px", height: "48px", padding: 0, lineHeight: 1, fontSize: "1.4rem", flexShrink: 0, backgroundColor: "var(--color-accent)", border: "none" }}
                   onClick={handleAddToCart}
                 >
                   +
@@ -438,12 +319,7 @@ function ProductDetail() {
               <Button
                 size="lg"
                 className="w-100 fw-semibold"
-                style={{
-                  backgroundColor: "var(--color-accent)",
-                  border: "none",
-                  padding: "14px",
-                  fontSize: "1rem",
-                }}
+                style={{ backgroundColor: "var(--color-accent)", border: "none", padding: "14px", fontSize: "1rem" }}
                 onClick={handleAddToCart}
               >
                 🛒 Sumar al carrito
@@ -466,91 +342,21 @@ function ProductDetail() {
         </Row>
       </div>
 
-      {/* Descripción */}
-      {product.description && product.description.trim().length > 0 && (
-        <div
-          style={{
-            backgroundColor: "var(--color-surface)",
-            borderRadius: "var(--border-radius)",
-            boxShadow: "var(--shadow-sm)",
-            padding: "28px 32px",
-            marginBottom: "16px",
-          }}
-        >
-          <h5
-            style={{
-              fontWeight: 700,
-              marginBottom: "16px",
-              borderLeft: "4px solid var(--color-accent)",
-              paddingLeft: "12px",
-            }}
-          >
-            Descripción
-          </h5>
-          <p
-            style={{
-              color: "var(--color-text)",
-              lineHeight: 1.8,
-              fontSize: "0.97rem",
-              margin: 0,
-              maxWidth: "720px",
-            }}
-          >
-            {product.description}
-          </p>
-        </div>
-      )}
-
       {/* Especificaciones */}
       {hasSpecs && (
-        <div
-          style={{
-            backgroundColor: "var(--color-surface)",
-            borderRadius: "var(--border-radius)",
-            boxShadow: "var(--shadow-sm)",
-            padding: "28px 32px",
-          }}
-        >
-          <h5
-            style={{
-              fontWeight: 700,
-              marginBottom: "16px",
-              borderLeft: "4px solid var(--color-accent)",
-              paddingLeft: "12px",
-            }}
-          >
+        <div style={{ backgroundColor: "var(--color-surface)", borderRadius: "var(--border-radius)", boxShadow: "var(--shadow-sm)", padding: "28px 32px", marginBottom: "16px" }}>
+          <h5 style={{ fontWeight: 700, marginBottom: "16px", borderLeft: "4px solid var(--color-accent)", paddingLeft: "12px" }}>
             Especificaciones
           </h5>
           <div style={{ maxWidth: "600px" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <tbody>
                 {Object.entries(parsedSpecs).map(([key, value], i) => (
-                  <tr
-                    key={key}
-                    style={{
-                      backgroundColor: i % 2 === 0 ? "#f8f8f8" : "white",
-                    }}
-                  >
-                    <td
-                      style={{
-                        padding: "12px 16px",
-                        fontWeight: 600,
-                        color: "var(--color-text)",
-                        width: "40%",
-                        borderBottom: "1px solid var(--color-border)",
-                        fontSize: "0.9rem",
-                      }}
-                    >
+                  <tr key={key} style={{ backgroundColor: i % 2 === 0 ? "#f8f8f8" : "white" }}>
+                    <td style={{ padding: "12px 16px", fontWeight: 600, color: "var(--color-text)", width: "40%", borderBottom: "1px solid var(--color-border)", fontSize: "0.9rem" }}>
                       {key}
                     </td>
-                    <td
-                      style={{
-                        padding: "12px 16px",
-                        color: "var(--color-text-muted)",
-                        borderBottom: "1px solid var(--color-border)",
-                        fontSize: "0.9rem",
-                      }}
-                    >
+                    <td style={{ padding: "12px 16px", color: "var(--color-text-muted)", borderBottom: "1px solid var(--color-border)", fontSize: "0.9rem" }}>
                       {value}
                     </td>
                   </tr>
@@ -558,6 +364,18 @@ function ProductDetail() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Descripción */}
+      {hasSummary && (
+        <div style={{ backgroundColor: "var(--color-surface)", borderRadius: "var(--border-radius)", boxShadow: "var(--shadow-sm)", padding: "28px 32px" }}>
+          <h5 style={{ fontWeight: 700, marginBottom: "16px", borderLeft: "4px solid var(--color-accent)", paddingLeft: "12px" }}>
+            Descripción
+          </h5>
+          <p style={{ color: "var(--color-text)", lineHeight: 1.8, fontSize: "0.97rem", margin: 0, maxWidth: "720px" }}>
+            {product.summary}
+          </p>
         </div>
       )}
     </Layout>

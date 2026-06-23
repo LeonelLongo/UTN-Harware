@@ -14,7 +14,8 @@ export const Item = sequelize.define(
     available: { type: DataTypes.BOOLEAN, defaultValue: false },
     category: { type: DataTypes.ENUM('Periféricos', 'Accesorios', 'Componentes'), allowNull: false },
     subCategory: {type: DataTypes.STRING, allowNull: true},
-    isOffer: {type: DataTypes.BOOLEAN, defaultValue: false}
+    isOffer: {type: DataTypes.BOOLEAN, defaultValue: false},
+    specs: { type: DataTypes.TEXT, allowNull: true }
   },
   {
     timestamps: false,
