@@ -36,7 +36,10 @@ function ComprasAdmin() {
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (!res.ok) throw new Error("No se pudo actualizar el estado.");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "No se pudo actualizar el estado.");
+      }
       const updated = await res.json();
       setPurchases(
         purchases.map((p) => (p.purchaseId === purchaseId ? updated : p)),

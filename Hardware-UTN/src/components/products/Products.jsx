@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "../layout/Layout";
 import ProductList from "./ProductList";
 import LoginPrompt from "../auth/LoginPrompt";
 import { useAppContext } from "../../context/AppContext";
+import { warningToast } from "../../services/notifications";
 
 const CATEGORIES = [
   "Periféricos",
@@ -17,7 +18,16 @@ function Products() {
   const initialQ = searchParams.get("q") || "";
   const [searchQuery, setSearchQuery] = useState(initialQ);
   const [selectedCategory, setSelectedCategory] = useState("Todas");
+  const [selectedSubCategory, setSelectedSubCategory] = useState("Todas");
   const [showPrompt, setShowPrompt] = useState(false);
+
+  useEffect(() => {
+    setSelectedSubCategory("Todas");
+  }, [selectedCategory]);
+
+  const availableSubCategories = selectedCategory !== "Todas"
+    ? [...new Set(products.filter(p => p.category === selectedCategory && p.subCategory).map(p => p.subCategory))]
+    : [];
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch = p.title
@@ -25,7 +35,9 @@ function Products() {
       .includes(searchQuery.toLowerCase());
     const matchesCategory =
       selectedCategory === "Todas" || p.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesSubCategory =
+      selectedSubCategory === "Todas" || p.subCategory === selectedSubCategory;
+    return matchesSearch && matchesCategory && matchesSubCategory;
   }).sort((a, b) => (a.stock === 0 ? 1 : 0) - (b.stock === 0 ? 1 : 0));
 
   const ofertaIds = new Set(products.filter((p) => p.isOffer).map((p) => p.id));
@@ -37,6 +49,10 @@ function Products() {
     }
     const existing = cart.find((p) => p.id === product.id);
     if (existing) {
+      if (product.stock != null && existing.quantity >= product.stock) {
+        warningToast(`Stock máximo alcanzado para "${product.title}".`);
+        return;
+      }
       setCart(
         cart.map((p) =>
           p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p,
@@ -112,6 +128,37 @@ function Products() {
               {cat}
             </button>
           ))}
+
+          {availableSubCategories.length > 0 && (
+            <>
+              <p style={{ color: "#999", fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", margin: "14px 0 8px 0" }}>
+                Subcategorías
+              </p>
+              {["Todas", ...availableSubCategories].map((sub) => (
+                <button
+                  key={sub}
+                  onClick={() => setSelectedSubCategory(sub)}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    textAlign: "center",
+                    padding: "6px 10px",
+                    borderRadius: "var(--border-radius)",
+                    border: selectedSubCategory === sub ? "none" : "1px solid #eee",
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                    fontWeight: selectedSubCategory === sub ? 700 : 400,
+                    backgroundColor: selectedSubCategory === sub ? "#555" : "#f8f8f8",
+                    color: selectedSubCategory === sub ? "white" : "#555",
+                    marginBottom: "5px",
+                    transition: "background-color 0.15s, color 0.15s",
+                  }}
+                >
+                  {sub}
+                </button>
+              ))}
+            </>
+          )}
         </div>
 
         {/* Grilla de productos */}

@@ -56,21 +56,22 @@ function UsuariosAdmin() {
   };
 
   const handleSave = async () => {
-    if (
-      !form.firstName.trim() ||
-      !form.lastName.trim() ||
-      !form.mailAdress.trim()
-    )
+    if (editingUser) {
+      // edición: solo se cambia el rol
+    } else if (!form.firstName.trim() || !form.lastName.trim() || !form.mailAdress.trim()) {
       return;
+    }
 
-    const body = {
-      firstName: form.firstName,
-      lastName: form.lastName,
-      userName: form.userName,
-      mailAdress: form.mailAdress,
-      ...(form.password && { password: form.password }),
-      ...(isSuperAdmin && { rol: form.rol }),
-    };
+    const body = editingUser
+      ? { rol: form.rol }
+      : {
+          firstName: form.firstName,
+          lastName: form.lastName,
+          userName: form.userName,
+          mailAdress: form.mailAdress,
+          password: form.password,
+          rol: form.rol,
+        };
 
     try {
       if (editingUser) {
@@ -197,6 +198,8 @@ function UsuariosAdmin() {
                     size="sm"
                     variant="outline-danger"
                     onClick={() => setShowDeleteConfirm(u.userId)}
+                    disabled={u.rol === "superAdmin"}
+                    title={u.rol === "superAdmin" ? "No se puede eliminar un Super Admin" : ""}
                   >
                     Eliminar
                   </Button>
@@ -218,62 +221,17 @@ function UsuariosAdmin() {
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold">
-            {editingUser ? "Editar usuario" : "Agregar usuario"}
+            {editingUser ? "Cambiar rol de usuario" : "Agregar usuario"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <div className="row">
-              <Form.Group className="mb-3 col-6">
-                <Form.Label className="fw-semibold">Nombre</Form.Label>
-                <Form.Control
-                  value={form.firstName}
-                  onChange={(e) =>
-                    setForm({ ...form, firstName: e.target.value })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3 col-6">
-                <Form.Label className="fw-semibold">Apellido</Form.Label>
-                <Form.Control
-                  value={form.lastName}
-                  onChange={(e) =>
-                    setForm({ ...form, lastName: e.target.value })
-                  }
-                />
-              </Form.Group>
-            </div>
-            <Form.Group className="mb-3">
-              <Form.Label className="fw-semibold">Nombre de usuario</Form.Label>
-              <Form.Control
-                value={form.userName}
-                onChange={(e) => setForm({ ...form, userName: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label className="fw-semibold">Email</Form.Label>
-              <Form.Control
-                type="email"
-                value={form.mailAdress}
-                onChange={(e) =>
-                  setForm({ ...form, mailAdress: e.target.value })
-                }
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label className="fw-semibold">
-                {editingUser
-                  ? "Nueva contraseña (dejar vacío para no cambiar)"
-                  : "Contraseña"}
-              </Form.Label>
-              <Form.Control
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-              />
-            </Form.Group>
-            {isSuperAdmin && (
-              <Form.Group className="mt-3">
+          {editingUser ? (
+            <Form>
+              <div className="mb-4 p-3 rounded" style={{ backgroundColor: "#f8f8f8", border: "1px solid #eee" }}>
+                <p className="mb-1 fw-semibold">{editingUser.userName}</p>
+                <p className="mb-0 text-muted small">{editingUser.mailAdress}</p>
+              </div>
+              <Form.Group>
                 <Form.Label className="fw-semibold">Rol</Form.Label>
                 <Form.Select
                   value={form.rol}
@@ -284,27 +242,72 @@ function UsuariosAdmin() {
                   <option value="superAdmin">Super Admin</option>
                 </Form.Select>
               </Form.Group>
-            )}
-          </Form>
+            </Form>
+          ) : (
+            <Form>
+              <div className="row">
+                <Form.Group className="mb-3 col-6">
+                  <Form.Label className="fw-semibold">Nombre</Form.Label>
+                  <Form.Control
+                    value={form.firstName}
+                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3 col-6">
+                  <Form.Label className="fw-semibold">Apellido</Form.Label>
+                  <Form.Control
+                    value={form.lastName}
+                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                  />
+                </Form.Group>
+              </div>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold">Nombre de usuario</Form.Label>
+                <Form.Control
+                  value={form.userName}
+                  onChange={(e) => setForm({ ...form, userName: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold">Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  value={form.mailAdress}
+                  onChange={(e) => setForm({ ...form, mailAdress: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold">Contraseña</Form.Label>
+                <Form.Control
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Label className="fw-semibold">Rol</Form.Label>
+                <Form.Select
+                  value={form.rol}
+                  onChange={(e) => setForm({ ...form, rol: e.target.value })}
+                >
+                  <option value="user">Usuario</option>
+                  <option value="admin">Admin</option>
+                  <option value="superAdmin">Super Admin</option>
+                </Form.Select>
+              </Form.Group>
+            </Form>
+          )}
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="outline-secondary"
-            onClick={() => setShowModal(false)}
-          >
+          <Button variant="outline-secondary" onClick={() => setShowModal(false)}>
             Cancelar
           </Button>
           <Button
             style={{ backgroundColor: "var(--color-accent)", border: "none" }}
             onClick={handleSave}
-            disabled={
-              !form.firstName.trim() ||
-              !form.lastName.trim() ||
-              !form.mailAdress.trim() ||
-              (!editingUser && !form.password.trim())
-            }
+            disabled={!editingUser && (!form.firstName.trim() || !form.lastName.trim() || !form.mailAdress.trim() || !form.password.trim())}
           >
-            {editingUser ? "Guardar cambios" : "Agregar"}
+            {editingUser ? "Guardar rol" : "Agregar"}
           </Button>
         </Modal.Footer>
       </Modal>

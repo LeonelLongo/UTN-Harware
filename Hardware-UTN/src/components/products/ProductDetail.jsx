@@ -4,6 +4,7 @@ import { Row, Col, Button, Badge } from "react-bootstrap";
 import Layout from "../layout/Layout";
 import { useAppContext } from "../../context/AppContext";
 import { BASE_URL } from "../../services/apiConfig";
+import { warningToast } from "../../services/notifications";
 
 function ProductDetail() {
   const { cart, setCart, isLoggedIn, setShowLogin } = useAppContext();
@@ -39,6 +40,10 @@ function ProductDetail() {
     }
     const existing = cart.find((p) => p.id === product.id);
     if (existing) {
+      if (product.stock != null && existing.quantity >= product.stock) {
+        warningToast(`Stock máximo alcanzado para "${product.title}".`);
+        return;
+      }
       setCart(
         cart.map((p) =>
           p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p,

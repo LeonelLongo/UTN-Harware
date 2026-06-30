@@ -5,6 +5,7 @@ import { BASE_URL, TOKEN_KEY } from "../services/apiConfig";
 import { isTokenValid } from "../services/auth/auth.helpers";
 
 const LOGIN_DRAFT_KEY = "login_draft_email";
+const CART_KEY = "hardware-utn-cart";
 
 const getUserFromToken = () => {
   const token = localStorage.getItem(TOKEN_KEY);
@@ -25,7 +26,12 @@ export const AppContextProvider = ({ children }) => {
     storedUser?.rol === "superAdmin",
   );
   const [currentUser, setCurrentUser] = useState(storedUser);
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    try {
+      const saved = localStorage.getItem(CART_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [registerEmail, setRegisterEmail] = useState("");
@@ -36,6 +42,10 @@ export const AppContextProvider = ({ children }) => {
       localStorage.removeItem(TOKEN_KEY);
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  }, [cart]);
 
   useEffect(() => {
     fetch(`${BASE_URL}/items`)
@@ -61,6 +71,7 @@ export const AppContextProvider = ({ children }) => {
     setCart([]);
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(LOGIN_DRAFT_KEY);
+    localStorage.removeItem(CART_KEY);
   };
 
   return (

@@ -1,5 +1,6 @@
 import { Purchase } from "../Models/purchase.js";
 import { Users } from "../Models/users.js";
+import { Item } from "../Models/items.js";
 
 export const getAllPurchase = async (req, res) => {
   const purchases = await Purchase.findAll({ include: Users });
@@ -38,6 +39,16 @@ export const createPurchase = async (req, res) => {
     purchaseDate,
     status,
   });
+
+  for (const item of items) {
+    if (!item.id) continue;
+    const dbItem = await Item.findByPk(item.id);
+    if (dbItem) {
+      const newStock = Math.max(0, dbItem.stock - item.quantity);
+      await dbItem.update({ stock: newStock });
+    }
+  }
+
   res.status(201).json(purchase);
 };
 
@@ -49,8 +60,10 @@ export const updateStatus = async (req, res) => {
   const purchase = await Purchase.findByPk(purchaseId);
   if (!purchase)
     return res.status(404).json({ message: "Compra no encontrada" });
+  if (purchase.status === "COMPLETE")
+    return res.status(400).json({ message: "No se puede modificar una compra completada." });
   if (purchase.status === "CANCELED")
-    return res.status(400).json({ message: "No se puede modificar una compra cancelada" });
+    return res.status(400).json({ message: "No se puede modificar una compra cancelada." });
   await purchase.update({ status });
   res.json(purchase);
 };

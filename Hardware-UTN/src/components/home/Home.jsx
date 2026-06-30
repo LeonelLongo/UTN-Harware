@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import { warningToast } from "../../services/notifications";
 import { Carousel } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Layout from "../layout/Layout";
@@ -54,7 +55,7 @@ const arrowStyle = (side) => ({
 
 function Home() {
   const navigate = useNavigate();
-  const { products, cart, setCart } = useAppContext();
+  const { products, cart, setCart, isLoggedIn, setShowLogin } = useAppContext();
 
   const novedadRef = useRef(null);
   const [novedadWidth, setNovedadWidth] = useState(0);
@@ -97,12 +98,21 @@ function Home() {
   const getQuantity = (id) => cart.find((p) => p.id === id)?.quantity ?? 0;
 
   const handleAdd = (product) => {
+    if (!isLoggedIn) {
+      setShowLogin(true);
+      return;
+    }
     setCart((prev) => {
       const existing = prev.find((p) => p.id === product.id);
-      if (existing)
+      if (existing) {
+        if (product.stock != null && existing.quantity >= product.stock) {
+          warningToast(`Stock máximo alcanzado para "${product.title}".`);
+          return prev;
+        }
         return prev.map((p) =>
           p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p,
         );
+      }
       return [...prev, { ...product, quantity: 1 }];
     });
   };
@@ -162,7 +172,7 @@ function Home() {
                     const inView = i >= novedadSlide && i < novedadSlide + N_VISIBLE;
                     return (
                       <div key={p.id} style={{ width: `${novedadItemWidth}px`, flexShrink: 0, opacity: inView ? 1 : 0.3, transition: "opacity 0.4s ease", pointerEvents: inView ? "auto" : "none" }}>
-                        <ProductItem id={p.id} name={p.title} price={p.value} image={p.imageUrl} quantityInCart={getQuantity(p.id)} onAdd={() => handleAdd(p)} onRemove={() => handleRemove(p)} isNew={true} stock={p.stock} />
+                        <ProductItem id={p.id} name={p.title} price={p.value} image={p.imageUrl} quantityInCart={getQuantity(p.id)} onAdd={() => handleAdd(p)} onRemove={() => handleRemove(p)} isNew={true} discount={p.isOffer ? 20 : 0} stock={p.stock} />
                       </div>
                     );
                   })}
@@ -172,7 +182,7 @@ function Home() {
           ) : (
             <div style={productGrid}>
               {novedades.map((p) => (
-                <ProductItem key={p.id} id={p.id} name={p.title} price={p.value} image={p.imageUrl} quantityInCart={getQuantity(p.id)} onAdd={() => handleAdd(p)} onRemove={() => handleRemove(p)} isNew={true} stock={p.stock} />
+                <ProductItem key={p.id} id={p.id} name={p.title} price={p.value} image={p.imageUrl} quantityInCart={getQuantity(p.id)} onAdd={() => handleAdd(p)} onRemove={() => handleRemove(p)} isNew={true} discount={p.isOffer ? 20 : 0} stock={p.stock} />
               ))}
             </div>
           )

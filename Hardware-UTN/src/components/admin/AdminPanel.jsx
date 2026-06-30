@@ -5,7 +5,7 @@ import ProductosAdmin from "./sections/ProductosAdmin";
 import UsuariosAdmin from "./sections/UsuariosAdmin";
 import ComprasAdmin from "./sections/ComprasAdmin";
 
-const SECCIONES_ADMIN = ["Productos", "Usuarios"];
+const SECCIONES_ADMIN = ["Productos"];
 const SECCIONES_SUPERADMIN = ["Productos", "Usuarios", "Compras"];
 
 function AdminPanel() {

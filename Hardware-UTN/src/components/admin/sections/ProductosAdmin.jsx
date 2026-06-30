@@ -34,6 +34,7 @@ const textToSpecs = (text) => {
 const emptyForm = {
   title: "",
   value: "",
+  stock: "",
   imageUrl: "",
   summary: "",
   category: "",
@@ -65,11 +66,12 @@ function ProductosAdmin() {
     setForm({
       title: product.title,
       value: product.value,
+      stock: product.stock ?? "",
       imageUrl: product.imageUrl,
       summary: product.summary || "",
       category: product.category || "",
       subCategory: product.subCategory || "",
-      isOffer: product.isOffer || false,
+      isOffer: !!product.isOffer,
       specs: specsToText(product.specs),
     });
     setShowModal(true);
@@ -91,11 +93,12 @@ function ProductosAdmin() {
   };
 
   const handleSave = async () => {
-    if (!form.title.trim() || !form.value) return;
+    if (!form.title.trim() || !form.value || Number(form.value) < 0) return;
 
     const body = {
       title: form.title,
       value: Number(form.value),
+      stock: form.stock !== "" ? Math.max(0, Number(form.stock)) : 0,
       imageUrl: form.imageUrl,
       summary: form.summary,
       category: form.category,
@@ -304,15 +307,35 @@ function ProductosAdmin() {
                 }
               />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label className="fw-semibold">Precio ($)</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="Ej: 500000"
-                value={form.value}
-                onChange={(e) => setForm({ ...form, value: e.target.value })}
-              />
-            </Form.Group>
+            <div className="d-flex gap-2">
+              <Form.Group className="mb-3 flex-fill">
+                <Form.Label className="fw-semibold">Precio ($)</Form.Label>
+                <Form.Control
+                  type="number"
+                  placeholder="Ej: 500000"
+                  min="0"
+                  value={form.value}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === "" || Number(v) >= 0) setForm({ ...form, value: v });
+                  }}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3" style={{ width: "120px", flexShrink: 0 }}>
+                <Form.Label className="fw-semibold">Stock</Form.Label>
+                <Form.Control
+                  type="number"
+                  placeholder="0"
+                  min="0"
+                  value={form.stock}
+                  isInvalid={form.stock !== "" && Number(form.stock) < 0}
+                  onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                />
+                <Form.Control.Feedback type="invalid">
+                  Stock inválido.
+                </Form.Control.Feedback>
+              </Form.Group>
+            </div>
             <Form.Group className="mb-3">
               <Form.Label className="fw-semibold">URL de imagen</Form.Label>
               <Form.Control
@@ -374,7 +397,7 @@ function ProductosAdmin() {
           <Button
             style={{ backgroundColor: "var(--color-accent)", border: "none" }}
             onClick={handleSave}
-            disabled={!form.title.trim() || !form.value}
+            disabled={!form.title.trim() || !form.value || (form.stock !== "" && Number(form.stock) < 0)}
           >
             {editingProduct ? "Guardar cambios" : "Agregar"}
           </Button>

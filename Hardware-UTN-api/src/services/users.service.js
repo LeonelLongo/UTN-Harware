@@ -20,15 +20,30 @@ export const createUsers = async (req, res) => {
   const { firstName, lastName, userName, mailAdress, password, rol } = req.body;
   if (!firstName || !lastName || !userName || !mailAdress || !password)
     return res.status(400).json({ message: "Todos los campos son requeridos" });
-  const user = await Users.create({
-    firstName,
-    lastName,
-    userName,
-    mailAdress,
-    password,
-    ...(rol && { rol }),
-  });
-  res.status(201).json(user);
+
+  const existingEmail = await Users.findOne({ where: { mailAdress } });
+  if (existingEmail)
+    return res.status(409).json({ message: "El email ya está registrado." });
+
+  const existingUser = await Users.findOne({ where: { userName } });
+  if (existingUser)
+    return res.status(409).json({ message: "El nombre de usuario ya está en uso." });
+
+  try {
+    const user = await Users.create({
+      firstName,
+      lastName,
+      userName,
+      mailAdress,
+      password,
+      ...(rol && { rol }),
+    });
+    res.status(201).json(user);
+  } catch (err) {
+    if (err.name === "SequelizeUniqueConstraintError")
+      return res.status(409).json({ message: "El email o usuario ya están registrados." });
+    throw err;
+  }
 };
 
 export const updateUsers = async (req, res) => {
@@ -41,6 +56,10 @@ export const updateUsers = async (req, res) => {
 
 export const deleteUsers = async (req, res) => {
   const { userId } = req.params;
+  const user = await Users.findByPk(userId);
+  if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+  if (user.rol === "superAdmin")
+    return res.status(403).json({ message: "No se puede eliminar un Super Admin." });
   await Users.destroy({ where: { userId } });
   res.json({ message: `Usuario ${userId} eliminado` });
 };

@@ -33,6 +33,10 @@ export const createItem = async (req, res) => {
     return res.status(400).send({ message: "Title field is required" });
   }
 
+  if (value !== undefined && Number(value) < 0) {
+    return res.status(400).send({ message: "El precio no puede ser negativo." });
+  }
+
   const newItem = await Item.create({
     title,
     model,
@@ -52,39 +56,21 @@ export const createItem = async (req, res) => {
 
 export const updateItem = async (req, res) => {
   const { id } = req.params;
-  const {
-    title,
-    model,
-    rating,
-    value,
-    summary,
-    imageUrl,
-    available,
-    category,
-    subCategory,
-    stock,
-    isOffer,
-    specs,
-  } = req.body;
   const item = await Item.findByPk(id);
 
-  await item.update({
-    title,
-    model,
-    rating,
-    value,
-    summary,
-    imageUrl,
-    available,
-    category,
-    subCategory,
-    stock,
-    isOffer,
-    specs,
-  });
+  if (!item) return res.status(404).send({ message: "Item not found" });
 
-  await item.save();
+  if (req.body.value !== undefined && Number(req.body.value) < 0) {
+    return res.status(400).send({ message: "El precio no puede ser negativo." });
+  }
 
+  const allowed = ["title", "model", "value", "summary", "imageUrl", "available", "category", "subCategory", "stock", "isOffer", "specs"];
+  const updateData = {};
+  for (const field of allowed) {
+    if (req.body[field] !== undefined) updateData[field] = req.body[field];
+  }
+
+  await item.update(updateData);
   res.json(item);
 };
 

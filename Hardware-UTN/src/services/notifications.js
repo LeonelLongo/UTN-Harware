@@ -25,3 +25,10 @@ export const successToast = (message, config) => {
     ...config,
   });
 };
+
+export const warningToast = (message, config) => {
+  return toast.warning(message, {
+    ...defaultNotificationConfig,
+    ...config,
+  });
+};

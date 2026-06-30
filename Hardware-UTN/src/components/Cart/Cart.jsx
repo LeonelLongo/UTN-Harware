@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { warningToast } from "../../services/notifications";
 import {
   Row,
   Col,
@@ -20,7 +21,7 @@ const CUPON_VALIDO = "TUP2026";
 const CUOTAS = 6;
 
 function Cart() {
-  const { cart, setCart, currentUser } = useAppContext();
+  const { cart, setCart, currentUser, setProducts } = useAppContext();
   const [couponInput, setCouponInput] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponError, setCouponError] = useState(false);
@@ -37,7 +38,14 @@ function Cart() {
 
   const handleIncrement = (id) => {
     setCart(
-      cart.map((p) => (p.id === id ? { ...p, quantity: p.quantity + 1 } : p)),
+      cart.map((p) => {
+        if (p.id !== id) return p;
+        if (p.stock != null && p.quantity >= p.stock) {
+          warningToast(`Stock máximo alcanzado para "${p.title}".`);
+          return p;
+        }
+        return { ...p, quantity: p.quantity + 1 };
+      }),
     );
   };
 
@@ -88,6 +96,7 @@ function Cart() {
         body: JSON.stringify({
           userId: currentUser?.userId,
           items: cart.map((item) => ({
+            id: item.id,
             title: item.title,
             quantity: item.quantity,
             unitPrice: item.value,
@@ -97,6 +106,12 @@ function Cart() {
         }),
       });
       if (!res.ok) throw new Error(`Error ${res.status}`);
+
+      fetch(`${BASE_URL}/items`)
+        .then((r) => r.json())
+        .then((data) => setProducts(data))
+        .catch(() => {});
+
       setReceiptItems([...cart]);
       setReceiptTotal(total);
       setReceiptNumber(

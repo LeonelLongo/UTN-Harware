@@ -16,6 +16,7 @@ import Protected from "./components/auth/Protected";
 import NotFound from "./components/notFound/NotFound";
 import ProductDetail from "./components/products/ProductDetail";
 import MisCompras from "./components/purchases/MisCompras";
+import MiPerfil from "./components/profile/MiPerfil";
 
 function App() {
   const {
@@ -70,6 +71,14 @@ function App() {
           element={
             <Protected>
               <MisCompras />
+            </Protected>
+          }
+        />
+        <Route
+          path="/perfil"
+          element={
+            <Protected>
+              <MiPerfil />
             </Protected>
           }
         />

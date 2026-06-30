@@ -1,6 +1,6 @@
 import { Dropdown } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { FiUser, FiShoppingBag, FiLogOut } from "react-icons/fi";
+import { FiUser, FiShoppingBag, FiLogOut, FiSettings } from "react-icons/fi";
 import { useAppContext } from "../../context/AppContext";
 
 function UserMenu() {
@@ -45,10 +45,15 @@ function UserMenu() {
       </Dropdown.Toggle>
 
       <Dropdown.Menu>
+        <Dropdown.Item onClick={() => navigate("/perfil")}>
+          <FiSettings style={{ marginRight: "8px" }} />
+          Mi perfil
+        </Dropdown.Item>
         <Dropdown.Item onClick={() => navigate("/mis-compras")}>
           <FiShoppingBag style={{ marginRight: "8px" }} />
           Mis compras
         </Dropdown.Item>
+        <Dropdown.Divider />
         <Dropdown.Item onClick={handleLogoutClick} className="text-danger">
           <FiLogOut style={{ marginRight: "8px" }} />
           Cerrar sesión
